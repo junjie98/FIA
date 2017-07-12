@@ -1,13 +1,23 @@
 #!/bin/bash
 # Remedy Script for RHEL 7 based on CIS BenchMarks
-##########################################################
-# File System Configuration
+trap '' 2
+echo "##########################################################"
+echo "Remedy Script"
+echo "RHEL 7"
+echo "##########################################################"
+
+datetime=`date +"%m%d%y-%H%M"`
+exec > >(tee "/root/remedy-"$datetime".txt") 2>&1
+
+echo "File System Configuration"
 
 
-# 1.14 Set Sticky Bit on All World-Writable Directories
-df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | xargs chmod a+t
+echo "1.14 Set Sticky Bit on All World-Writable Directories"
+echo "$ df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t"
+df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t
 
-# 1.15 Disable Mounting of Legacy Filesystems
+echo "1.15 Disable Mounting of Legacy Filesystems"
+echo "$ touch /etc/modprobe.d/CIS.conf"
 touch /etc/modprobe.d/CIS.conf
 /bin/cat << EOM > /etc/modprobe.d/CIS.conf
 install cramfs /bin/true
