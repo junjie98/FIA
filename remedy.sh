@@ -33,3 +33,20 @@ install hfsplus /bin/true
 install squashfs /bin/true
 install udf /bin/true
 EOM
+
+echo "##########################################################"
+# Patching the Linux System
+echo "Patching the Linux System"
+echo "$ cat /etc/redhat-release"
+cat /etc/redhat-release
+
+echo "##########################################################"
+# 2. Remove Legacy Services
+echo "2. Remove Legacy Service"
+# 2.1 Remove telnet clients & server
+echo "$ yum -y erase telnet-server"
+yum -y erase telnet-server
+echo "$ yum -y erase telnet"
+yum -y erase telnet
+
+echo "##########################################################"
