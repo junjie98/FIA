@@ -22,6 +22,7 @@ df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -typ
 
 echo "##########################################################"
 # 1.15 Disable Mounting of Legacy Filesystem
+echo "1.15 Disable Mounting of Legacy Filesystem
 # cramfs Filesystem
 echo "cramfs Filesystem"
 echo "$ /sbin/modprobe -n -v cramfs"
@@ -83,7 +84,17 @@ echo "##########################################################"
 echo "##########################################################"
 # Verify Package Integrity Using RPM
 
+echo "##########################################################"
+# Removing Legacy Services
+echo "Removing Legacy Services"
+# 2.1 Remove telnet clients & servers
+echo "2.1 Remove telnet clients & servers"
+echo "$ rpm -q telnet"
+rpm -q telnet
+echo "$ rpm -q telnet-server"
+rpm -q telnet-server
 
+echo "##########################################################"
 
 
 
