@@ -1,6 +1,6 @@
 #!/bin/bash
 # Audit Script for RHEL 7 based on CIS BenchMarks
-trap '' 2
+trap '' 2 20
 echo "##########################################################"
 echo "Audit Script"
 echo "RHEL 7"

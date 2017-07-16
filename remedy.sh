@@ -1,6 +1,6 @@
 #!/bin/bash
 # Remedy Script for RHEL 7 based on CIS BenchMarks
-trap '' 2
+trap '' 2 20
 echo "##########################################################"
 echo "Remedy Script"
 echo "RHEL 7"
