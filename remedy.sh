@@ -2,6 +2,11 @@
 # Remedy Script for RHEL 7 based on CIS BenchMarks
 # Script misc. section
 trap '' 2 20
+# Check if script is executed by root
+if [ "$EUID" -ne 0 ]
+  then echo "Please run this script as root"
+  exit
+fi
 datetime=`date +"%m%d%y-%H%M"`
 exec > >(tee "/root/remedy-"$datetime".txt") 2>&1
 echo "##########################################################"
