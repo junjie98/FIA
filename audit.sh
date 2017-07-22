@@ -4,11 +4,30 @@
 trap '' 2 20
 # Check if script is executed by root
 if [ "$EUID" -ne 0 ]
-  then echo "Please run this script as root"
-  exit
+	then echo "Please run this script as root"
+	exit
 fi
+# Functions
+function output () {
+        if [[ $2 ]]; then
+                echo "$1, RESULT: PASS" >> $filename
+        else
+                echo "$1, RESULT: FAIL" >> $filename
+        fi
+}
+function no_output () {
+        if [[ $2 ]]; then
+                echo "$1, RESULT: FAIL" >> $filename
+        else
+                echo "$1, RESULT: PASS" >> $filename
+        fi
+}
+function manual () {
+        echo "$1, RESULT: Manually Test Again" >> $filename
+}
 datetime=`date +"%m%d%y-%H%M"`
-exec > >(tee "/root/audit-"$datetime".txt") 2>&1
+filename="FIA_Audit_Results-"$datetime".txt"
+touch $filename
 echo "##########################################################"
 echo "FIA Audit Script"
 echo "Red Hat Enterprise Linux 7"
