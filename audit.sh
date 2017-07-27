@@ -116,3 +116,24 @@ do
 	fi
 done
 
+# 3.10 Configure Mail Transfer Agent for LocalOnly Mode
+checkmailtransferagent=`netstat -an | grep ":25[[:space:]]"`
+
+if [ -n "$checkmailtransferagent" ]
+then
+	checklistening=`netstat -an | grep LISTEN`
+	if [ -n "$checklistening" ]
+	then
+		checklocaladdress=`netstat -an | grep [[:space:]]127.0.0.1:25[[:space:]] | grep LISTEN`
+		if [ -n "$checklocaladdress" ]
+		then
+			echo "$count. MTA - PASSED (Mail Transfer Agent is listening on the loopback address)"
+		else
+			echo "$count. MTA - FAILED (Mail Transfer Agent is not listening on the loopback address)"
+		fi
+	else
+		echo "$count. MTA - FAILED (Mail Transfer Agent is not in listening mode)"
+	fi
+else
+	echo "$count. MTA - FAILED (Mail Transfer Agent is not configured/installed)"
+fi
