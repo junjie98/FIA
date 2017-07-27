@@ -182,3 +182,27 @@ else
 		((count++))
 	fi
 fi
+
+# 5.1 Restrict Core Dumps
+checkcoredump=`grep "hard core" /etc/security/limits.conf`
+coredumpval="* hard core 0"
+
+if [ "$checkcoredump" == "$coredumpval" ]
+then
+	checksetuid=`sysctl fs.suid_dumpable`
+	setuidval="fs.suid_dumpable = 0"
+
+	if [ "$checksetuid" == "$setuidval" ]
+	then
+		echo "$count. Core Dump - PASSED (Core dumps are restricted and setuid programs are prevented from dumping core)"
+		((count++))
+	else
+		echo "$count. Core Dump - FAILED (Setuid programs are not prevented from dumping core)"
+		((count++))
+	fi
+
+else
+	echo "$count. Core Dump - FAILED (Core dumps are not restricted)"
+	((count++))
+fi
+
