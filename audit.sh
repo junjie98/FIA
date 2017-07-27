@@ -536,3 +536,15 @@ else
 	((count++))
 fi
 
+# 6.2.1.5 Enable Auditing for Processes That Start Prior to auditd
+checkgrub=`grep "linux" /boot/grub2/grub.cfg | grep "audit=1"`
+
+if [ -z "$checkgrub" ]
+then
+	echo "$count. Prior Start Up - FAILED (Prior start up is not enabled)"
+	((count++))
+else
+	echo "$count. Prior Start Up - PASSED (Prior start up is enabled)"
+	((count++))
+fi
+
