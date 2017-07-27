@@ -206,3 +206,16 @@ else
 	((count++))
 fi
 
+# 5.2 Enable Randomized Virtual Memory Region Placement
+checkvirtualran=`sysctl kernel.randomize_va_space`
+virtualranval="kernel.randomize_va_space = 2"
+
+if [ "$checkvirtualran" == "$virtualranval" ]
+then
+	echo "$count. Randomized Virtual Memory Region Placement - PASSED (Virtual memory is randomized)"
+	((count++))
+else
+	echo "$count. Randomized Virtual Memory Region Placement - FAILED (Virtual memory is not randomized)"
+	((count++))
+fi
+
