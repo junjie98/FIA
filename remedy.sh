@@ -96,7 +96,7 @@ then
 	systemctl disable nfs-secure-server
 fi
 
-# 3.9 Remove Services
+# 3.9 Remove DNS, FTP, HTTP, HTTP-Proxy, SNMP
 checkyumdns=`yum list bind | grep "Available Packages"`
 checkdns=`systemctl status named | grep inactive`
 checkdns1=`systemctl status named | grep disabled`
@@ -157,5 +157,13 @@ if [ -z "$checkyumsnmp" ]
 	fi
 fi
 
+# 3.10 MTA
+checkmta=`netstat -an | grep LIST | grep "127.0.0.1:25[[:space:]]"`
 
+if [ -z "$checkmta" ]
+then
+	sed -ie '116iinet_interfaces = localhost' /etc/postfix/main.cf
+=======
+>>>>>>> f4da9236b56a4466b9182a151648cc1bcfe86ee1
+fi
 
