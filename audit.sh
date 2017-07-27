@@ -9,11 +9,11 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # 3.6 Configure NTP
-checkntp=`yum list ntp | grep "Installed Packages" `
+checkntp=`yum list ntp | grep "Installed Packages"`
 checkntp1=`grep "^restrict default kod nomodify notrap nopeer noquery" /etc/ntp.conf`
 checkntp2=`grep "^restrict -6 default kod nomodify notrap nopeer noquery" /etc/ntp.conf` 
 checkntp3=`grep "^server" /etc/ntp.conf | grep server`
-checkntp4=`grep 'OPTIONS="-u ntp:ntp -p /var/run/ntpd.pid"' /etc/sysconfig/ntpd `
+checkntp4=`grep 'OPTIONS="-u ntp:ntp -p /var/run/ntpd.pid"' /etc/sysconfig/ntpd`
 if [ -n "$checkntp" ]
 then
 if [ -n "$checkntp1" ]
@@ -46,4 +46,25 @@ else
 	echo "$count. NTP - FAILED (NTP is not installed)"
 	((count++))
 fi
+
+# 3.7 Remove LDAP
+checkldapclients=`yum list openldap-clients | grep 'Available Packages'`
+checkldapservers=`yum list openldap-servers | grep 'Available Packages'`
+
+if [ -n "checkldapclients" -a -n "checkldapservers" ]
+then 
+	echo "$count. LDAP - PASSED (LDAP server and client are both not installed)"
+	((count++))
+elif [ -n "checkldapclients" -a -z "checkldapservers" ]
+then
+	echo "$count. LDAP - FAILED (LDAP server is installed)"
+	((count++))
+elif [ -z "checkldapclients" -a -n "checkldapservers" ]
+then
+	echo "$count. LDAP - FAILED (LDAP client is installed)"
+	((count++))
+else 
+	echo "$count. LDAP - FAILED (Both LDAP client and server are installed)"
+	((count++))
+fi 
 
