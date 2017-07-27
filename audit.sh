@@ -142,7 +142,7 @@ else
 	((count++))
 fi
 
-# 4.1 Set User/Group Owner on /boot/grub2/grub.cfg
+# 4.1 & 4.2 Set User/Group Owner on /boot/grub2/grub.cfg & Set Permissions on /boot/grub2/grub.cfg
 checkgrubowner=`stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg`
 
 if  [ "$checkgrubowner" == "owner=root group=root" ]
@@ -162,22 +162,3 @@ else
 	((count++))
 fi 
 
-# 4.2 Set Permissions on /boot/grub2/grub.cfg
-checkbootloaderuser=`grep "^set superusers" /boot/grub2/grub.cfg`
-
-if [ -z "$checkbootloaderuser" ]
-then
-	echo "$count. Boot Loader Password - FAILED (Boot loader is not configured with any superuser)"
-	((count++))
-else
-	checkbootloaderpassword=`grep "^password" /boot/grub2/grub.cfg`
-
-	if [ -z "$checkbootloaderpassword" ]
-	then
-		echo "$count. Boot Loader Password - FAILED (Boot loader is not configured with a password)"
-		((count++))
-	else
-		echo "$count. Boot Loader Password - PASSED (Boot loader is configured with a superuser and password)"
-		((count++))
-	fi
-fi
