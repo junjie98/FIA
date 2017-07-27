@@ -459,3 +459,16 @@ else
 	((count++))
 fi
 
+# 6.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts
+checkrsysloglis=`grep '^$ModLoad imtcp.so' /etc/rsyslog.conf`
+checkrsysloglis1=`grep '^$InputTCPServerRun' /etc/rsyslog.conf`
+
+if [ -z "$checkrsysloglis" -o -z "$checkrsysloglis1" ]
+then
+	echo "$count. Remote rsyslog - FAILED (Rsyslog is not listening for remote messages)"
+	((count++))
+else
+	echo "$count. Remote rsyslog - PASSED (Rsyslog is listening for remote messages)"
+	((count++))
+fi
+
