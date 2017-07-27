@@ -240,3 +240,47 @@ else
 	((count++))
 fi
 
+# 6.1.3 Configure /etc/rsyslog.conf
+checkvarlogmessageexist=`ls -l /var/log/ | grep messages`
+
+if [ -n "$checkvarlogmessageexist" ]
+then
+	checkvarlogmessageown=`ls -l /var/log/messages | cut -d ' ' -f3,4`
+
+	if [ "$checkvarlogmessageown" == "root root" ]
+	then
+		checkvarlogmessagepermit=`ls -l /var/log/messages | cut -d ' ' -f1`
+
+		if [ "$checkvarlogmessagepermit" == "-rw-------." ]
+		then
+			checkvarlogmessage=`grep /var/log/messages /etc/rsyslog.conf`
+
+			if [ -n "$checkvarlogmessage" ]
+			then
+				checkusermessage=`grep /var/log/messages /etc/rsyslog.conf | grep "^auth,user.*"`
+
+				if [ -n "$checkusermessage" ]
+				then
+					echo "$count. /var/log/messages - PASSED (Owner, group owner, permissions, facility are configured correctly; messages logging is set)"
+					((count++))
+				else
+					echo "$count. /var/log/messages - FAILED (Facility is not configured correctly)"
+					((count++))
+				fi
+			else
+				echo "$count. /var/log/messages - FAILED (messages logging is not set)"
+				((count++))
+			fi
+
+		else
+			echo "$count. /var/log/messages - FAILED (Permissions of file is configured incorrectly)"
+			((count++))
+		fi
+	else
+		echo "$count. /var/log/messages - FAILED (Owner and group owner of file is configured incorrectly)"
+		((count++))
+	fi
+else
+	echo "$count. /var/log/messages - FAILED (/var/log/messages file does not exist)"
+	((count++))
+fi
