@@ -241,6 +241,7 @@ else
 fi
 
 # 6.1.3 Configure /etc/rsyslog.conf
+# 6.1.4 Create and Set Permissions on rsyslog Log Files
 checkvarlogmessageexist=`ls -l /var/log/ | grep messages`
 
 if [ -n "$checkvarlogmessageexist" ]
@@ -285,7 +286,6 @@ else
 	((count++))
 fi
 
-# 6.1.4 Create and Set Permissions on rsyslog Log Files
 checkvarlogkernexist=`ls -l /var/log/ | grep kern.log`
 
 if [ -n "$checkvarlogkernexist" ]
