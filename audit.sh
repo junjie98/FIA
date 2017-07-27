@@ -219,3 +219,24 @@ else
 	((count++))
 fi
 
+# 6.1.1 Install the rsyslog package
+# 6.1.2 Activate the rsyslog service
+checkrsyslog=`rpm -q rsyslog | grep "^rsyslog"`
+
+if [ -n "$checkrsyslog" ]
+then
+	checkrsysenable=`systemctl is-enabled rsyslog`
+
+	if [ "$checkrsysenable" == "enabled" ]
+	then
+		echo "$count. rsyslog - PASSED (Rsyslog is installed and enabled)"
+		((count++))
+	else
+		echo "$count. rsyslog - FAILED (Rsyslog is disabled)"
+		((count++))
+	fi
+else
+	echo "$count. rsyslog - FAILED (Rsyslog is not installed)"
+	((count++))
+fi
+
