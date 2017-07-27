@@ -727,3 +727,14 @@ else
 	((count++))
 fi
 
+# 6.2.1.9 Record Events That Modify the System's Mandatory Access Controls
+checkmodifymandatoryaccesscontrol=`grep \/etc\/selinux /etc/audit/audit.rules`
+
+if [ -z "$checkmodifymandatoryaccesscontrol" ]
+then
+	echo "$count. Modify the System's Mandatory Access Controls Events - FAILED (Recording of modified system's mandatory access controls events is not configured)"
+	((count++))
+else
+	echo "$count. Modify the System's Mandatory Access Controls Events - PASSED (Recording of modified system's mandatory access controls events is configured)"
+	((count++))
+fi
