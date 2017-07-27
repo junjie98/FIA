@@ -19,14 +19,14 @@ then
 if [ -n "$checkntp1" ]
 then 
 	if [ -n "$checkntp2" ]
-	then 
+	then
 		if [ -n "$checkntp3" ]
-			then 
+			then
 				if [ -n "$checkntp4" ]
 				then
 					echo "$count. NTP - PASSED (NTP has been properly configured)"
 					((count++))
-				else 
+				else
 					echo "$count. NTP - FAILED (Option has not been configured in /etc/sysconfig/ntpd)" 
 					((count++))
 				fi
@@ -34,15 +34,15 @@ then
 			echo "$count. NTP - FAILED (Failed to list down NTP servers)"
 			((count++))
 		fi
-	else 
+	else
 		echo "$count. NTP - FAILED (Failed to implement restrict -6 default kod nomodify notrap nopeer noquery)"
 		((count++))
 	fi
-else 
+else
 	echo "$count. NTP - FAILED (Failed to implement restrict default kod nomodify notrap nopeer noquery)"
 	((count++))
-fi 
-else 
+fi
+else
 	echo "$count. NTP - FAILED (NTP is not installed)"
 	((count++))
 fi
@@ -63,7 +63,7 @@ elif [ -z "checkldapclients" -a -n "checkldapservers" ]
 then
 	echo "$count. LDAP - FAILED (LDAP client is installed)"
 	((count++))
-else 
+else
 	echo "$count. LDAP - FAILED (Both LDAP client and server are installed)"
 	((count++))
 fi
@@ -72,14 +72,47 @@ fi
 nfsservices=( "nfs-lock" "nfs-secure" "rpcbind" "nfs-idmap" "nfs-secure-server" )
 
 for eachnfsservice in ${nfsservices[*]}
-do 
+do
 	checknfsservices=`systemctl is-enabled $eachnfsservice | grep enabled`
 	if [ -z "$checknfsservices" ]
 	then 
-		echo "$count. $eachnfsservice - PASSED ($eachnfsservice is disabled) "
+		echo "$count. $eachnfsservice - PASSED ($eachnfsservice is disabled)"
 		((count++))
 	else 
 		echo "$count. $eachnfsservice - FAILED ($eachnfsservice is enabled)"
 		((count++))
 	fi
 done
+
+# 3.9 Remove DNS, FTP, HTTP, HTTP-Proxy, SNMP
+standardservices=( "named" "vsftpd" "httpd" "squid.service" "snmpd" ) 
+
+for eachstandardservice in ${standardservices[*]}
+do
+	checkserviceexist=`systemctl status $eachstandardservice | grep not-found`
+	if [ -n "$checkserviceexist" ]
+	then
+		echo "$count. $eachstandardservice - PASSED ($eachstandardservice does not exist in the system)"
+		((count++))
+	else
+		checkstandardservices=`systemctl status $eachstandardservice | grep disabled`
+		checkstandardservices1=`systemctl status $eachstandardservice | grep inactive`
+		if [ -z "$checkstandardservices" -a -z "$checkstandardservices1" ]
+		then
+			echo "$count. $eachstandardservice - FAILED ($eachstandardservice is active and enabled)"
+			((count++))
+		elif [ -z "$checkstandardservices" -a -n "$checkstandardservices1" ]
+		then
+			echo "$count. $eachstandardservice - FAILED ($eachstandardservice is inactive but enabled)"
+			((count++))
+		elif [ -n "$checkstandardservices" -a -z "$checkstandardservices1" ]
+		then
+			echo "$count. $eachstandardservice - FAILED ($eachstandardservice is disabled but active)"
+			((count++))
+		else
+			echo "$count. $eachstandardservice - PASSED ($eachstandardservice is disabled and inactive)"
+			((count++))
+		fi
+	fi
+done
+
