@@ -329,3 +329,133 @@ else
 	((count++))
 fi
 
+checkvarlogdaemonexist=`ls -l /var/log/ | grep daemon.log`
+
+if [ -n "$checkvarlogdaemonexist" ]
+then
+	checkvarlogdaemonown=`ls -l /var/log/daemon.log | cut -d ' ' -f3,4`
+
+	if [ "$checkvarlogdaemonown" == "root root" ]
+	then
+		checkvarlogdaemonpermit=`ls -l /var/log/daemon.log | cut -d ' ' -f1`
+
+		if [ "$checkvarlogdaemonpermit" == "-rw-------." ]
+		then
+			checkvarlogdaemon=`grep /var/log/daemon.log /etc/rsyslog.conf`
+
+			if [ -n "$checkvarlogdaemon" ]
+			then
+				checkuserdaemon=`grep /var/log/daemon.log /etc/rsyslog.conf | grep "^daemon.*"`
+
+				if [ -n "$checkuserdaemon" ]
+				then
+					echo "$count. /var/log/daemon.log - PASSED (Owner, group owner, permissions, facility are configured correctly; daemon.log logging is set)"
+					((count++))
+				else
+					echo "$count. /var/log/daemon.log - FAILED (Facility is not configured correctly)"
+					((count++))
+				fi
+
+			else
+				echo "$count. /var/log/daemon.log - FAILED (daemon.log logging is not set)"
+				((count++))
+			fi
+		else
+			echo "$count. /var/log/daemon.log - FAILED (Permissions of file is configured incorrectly)"
+			((count++))
+		fi
+	else
+		echo "$count. /var/log/daemon.log - FAILED (Owner and group owner of file is configured incorrectly)"
+		((count++))
+	fi
+else
+	echo "$count. /var/log/daemon.log - FAILED (/var/log/daemon.log file does not exist)"
+	((count++))
+fi
+
+checkvarlogsyslogexist=`ls -l /var/log/ | grep syslog.log`
+
+if [ -n "$checkvarlogsyslogexist" ]
+then
+	checkvarlogsyslogown=`ls -l /var/log/syslog.log | cut -d ' ' -f3,4`
+
+	if [ "$checkvarlogsyslogown" == "root root" ]
+	then
+		checkvarlogsyslogpermit=`ls -l /var/log/syslog.log | cut -d ' ' -f1`
+
+		if [ "$checkvarlogsyslogpermit" == "-rw-------." ]
+		then
+			checkvarlogsyslog=`grep /var/log/syslog.log /etc/rsyslog.conf`
+
+			if [ -n "$checkvarlogsyslog" ]
+			then
+				checkusersyslog=`grep /var/log/syslog.log /etc/rsyslog.conf | grep "^syslog.*"`
+
+				if [ -n "$checkusersyslog" ]
+				then
+					echo "$count. /var/log/syslog.log - PASSED (Owner, group owner, permissions, facility are configured correctly; syslog.log logging is set)"
+					((count++))
+				else
+					echo "$count. /var/log/syslog.log - FAILED (Facility is not configured correctly)"
+					((count++))
+				fi
+			else
+				echo "$count. /var/log/syslog.log - FAILED (syslog.log logging is not set)"
+				((count++))
+			fi
+		else
+			echo "$count. /var/log/syslog.log - FAILED (Permissions of file is configured incorrectly)"
+			((count++))
+		fi
+	else
+		echo "$count. /var/log/syslog.log - FAILED (Owner and group owner of file is configured incorrectly)"
+		((count++))
+	fi
+else
+	echo "$count. /var/log/syslog.log - FAILED (/var/log/syslog.log file does not exist)"
+	((count++))
+fi
+
+checkvarlogunusedexist=`ls -l /var/log/ | grep unused.log`
+
+if [ -n "$checkvarlogunusedexist" ]
+then
+	checkvarlogunusedown=`ls -l /var/log/unused.log | cut -d ' ' -f3,4`
+
+	if [ "$checkvarlogunusedown" == "root root" ]
+	then
+		checkvarlogunusedpermit=`ls -l /var/log/unused.log | cut -d ' ' -f1`
+
+		if [ "$checkvarlogunusedpermit" == "-rw-------." ]
+		then
+			checkvarlogunused=`grep /var/log/unused.log /etc/rsyslog.conf`
+
+			if [ -n "$checkvarlogunused" ]
+			then
+				checkuserunused=`grep /var/log/unused.log /etc/rsyslog.conf | grep "^lpr,news,uucp,local0,local1,local2,local3,local4,local5,local6.*"`
+
+				if [ -n "$checkuserunused" ]
+				then
+					echo "$count. /var/log/unused.log - PASSED (Owner, group owner, permissions, facility are configured correctly; unused.log logging is set)"
+					((count++))
+				else
+					echo "$count. /var/log/unused.log - FAILED (Facility is not configured correctly)"
+					((count++))
+				fi
+			else
+				echo "$count. /var/log/unused.log - FAILED (unused.log logging is not set)"
+				((count++))
+			fi
+		else
+			echo "$count. /var/log/unused.log - FAILED (Permissions of file is configured incorrectly)"
+			((count++))
+		fi
+	else
+		echo "$count. /var/log/unused.log - FAILED (Owner and group owner of file is configured incorrectly)"
+		((count++))
+	fi
+else
+	echo "$count. /var/log/unused.log - FAILED (/var/log/unused.log file does not exist)"
+	((count++))
+fi
+
