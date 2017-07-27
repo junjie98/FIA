@@ -128,12 +128,36 @@ then
 		if [ -n "$checklocaladdress" ]
 		then
 			echo "$count. MTA - PASSED (Mail Transfer Agent is listening on the loopback address)"
+			((count++))
 		else
 			echo "$count. MTA - FAILED (Mail Transfer Agent is not listening on the loopback address)"
+			((count++))
 		fi
 	else
 		echo "$count. MTA - FAILED (Mail Transfer Agent is not in listening mode)"
+		((count++))
 	fi
 else
 	echo "$count. MTA - FAILED (Mail Transfer Agent is not configured/installed)"
+	((count++))
 fi
+
+# 4.1 Set User/Group Owner on /boot/grub2/grub.cfg
+checkgrubowner=`stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg`
+
+if  [ "$checkgrubowner" == "owner=root group=root" ]
+then
+	checkgrubpermission=`stat -L -c "%a" /boot/grub2/grub.cfg | cut -b 2,3`
+
+	if [ "$checkgrubpermission" == "00" ]
+	then
+		echo "$count. /boot/grub2/grub.cfg - PASSED (Owner, group owner and permission of file is configured correctly)"
+		((count++))
+	else
+		echo "$count. /boot/grub2/grub.cfg - FAILED (Permission of file is configured incorrectly"
+		((count++))
+	fi
+else
+	echo "$count. /boot/grub2/grub.cfg - FAILED (Owner and group owner of file is configured incorrectly)"
+	((count++))
+fi 
