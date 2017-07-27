@@ -8,48 +8,45 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 datetime=`date +"%m%d%y-%H%M"`
-exec > >(tee "/root/remedy-"$datetime".txt") 2>&1
-echo "##########################################################"
-echo "FIA Remedy Script"
-echo "Red Hat Enterprise Linux 7"
 
-echo "##########################################################"
-echo "File System Configuration"
+# 3.6 Configure NTP
+checkntpinstalled=`yum list ntp | grep "Installed"`
 
-echo "Set Sticky Bit on All World-Writable Directories"
-df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t
+if [ -z "$checkntpinstalled" ]
+then
+	yum install -y ntp
+fi
 
-echo "Disable Mounting of Legacy Filesystems"
-touch /etc/modprobe.d/CIS.conf
-/bin/cat << EOM > /etc/modprobe.d/CIS.conf
-install cramfs /bin/true
-install freevxfs /bin/true
-install jffs2 /bin/true
-install hfs /bin/true
-install hfsplus /bin/true
-install squashfs /bin/true
-install udf /bin/true
-EOM
+checkyumntp=`yum list ntp | grep "Available Packages"`
+checkntp1=`grep "^restrict default" /etc/ntp.conf`
+checkntp2=`grep "^restrict -6 default" /etc/ntp.conf`
+checkntp3=`grep "^server" /etc/ntp.conf`
+checkntp4=`grep "ntp:ntp" /etc/sysconfig/ntpd`
 
-echo "Patching the Linux System"
-cat /etc/redhat-release
+if [ -n "$checkyumntp" ]
+then
+	yum install -y ntp
+fi
+	
+if [ "$checkntp1" != "restrict default kod nomodify notrap nopeer noquery" ]
+then
+	sed -ie '8d' /etc/ntp.conf
+	sed -ie '8irestrict default kod nomodify notrap nopeer noquery' /etc/ntp.conf
+fi
 
-echo "Remove Legacy Service"
-yum -y erase telnet-server
-yum -y erase telnet
-yum -y erase rsh-server	
-yum -y erase rsh
-yum -y erase ypbind	
-yum -y erase ypserv	
-yum -y erase tftp
-yum -y erase tftp-server
-yum -y erase xinetd
-chkconfig chargen-dgram off
-chkconfig chargen-stream off	
-chkconfig daytime-dgram off
-chkconfig daytime-stream off	
-chkconfig echo-dgram off	
-chkconfig echo-stream off	
-chkconfig tcpmux-server off
+if [ "$checkntp2" != "restrict -6 default kod nomodify notrap nopeer noquery" ]
+then
+	sed -ie '9irestrict -6 default kod nomodify notrap nopeer noquery' /etc/ntp.conf
+fi
 
-echo "Special Services"
+if [ -z "$checkntp3" ]
+then
+	sed -ie '21iserver 10.10.10.10' /etc/ntp.conf #Assume 10.10.10.10 is NTP server
+fi
+
+if [ -z "$checkntp4" ]
+then
+	sed -ie '2d' /etc/sysconfig/ntpd
+	echo "1iOPTIONS=\"-u ntp:ntp -p /var/run/ntpd.pid\" " >> /etc/sysconfig/ntpd
+fi
+
