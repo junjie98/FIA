@@ -484,3 +484,15 @@ else
 	((count++))
 fi
 
+# 6.2.1.2 Keep All Auditing Information
+checklogfileaction=`grep max_log_file_action /etc/audit/auditd.conf | awk '{print $3}'`
+ 
+if [ "$checklogfileaction" == keep_logs ]
+then
+	echo "$count. Audit Log File Action - PASSED (Action of the audit log file is configured correctly)"
+	((count++))
+else
+	echo "$count. Audit Log File Action - FAILED (Action of the audit log file is not configured correcly)"
+	((count++))
+fi
+
