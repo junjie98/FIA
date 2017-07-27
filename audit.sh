@@ -284,3 +284,48 @@ else
 	echo "$count. /var/log/messages - FAILED (/var/log/messages file does not exist)"
 	((count++))
 fi
+
+# 6.1.4 Create and Set Permissions on rsyslog Log Files
+checkvarlogkernexist=`ls -l /var/log/ | grep kern.log`
+
+if [ -n "$checkvarlogkernexist" ]
+then
+	checkvarlogkernown=`ls -l /var/log/kern.log | cut -d ' ' -f3,4`
+
+	if [ "$checkvarlogkernown" == "root root" ]
+	then
+		checkvarlogkernpermit=`ls -l /var/log/kern.log | cut -d ' ' -f1`
+
+		if [ "$checkvarlogkernpermit" == "-rw-------." ]
+		then
+			checkvarlogkern=`grep /var/log/kern.log /etc/rsyslog.conf`
+
+			if [ -n "$checkvarlogkern" ]
+			then
+				checkuserkern=`grep /var/log/kern.log /etc/rsyslog.conf | grep "^kern.*"`
+
+				if [ -n "$checkuserkern" ]
+				then
+					echo "$count. /var/log/kern.log - PASSED (Owner, group owner, permissions, facility are configured correctly; kern.log logging is set)"
+					((count++))
+				else
+					echo "$count. /var/log/kern.log - FAILED (Facility is not configured correctly)"
+					((count++))
+				fi
+			else
+				echo "$count. /var/log/kern.log - FAILED (kern.log logging is not set)"
+				((count++))
+			fi
+		else
+			echo "$count. /var/log/kern.log - FAILED (Permissions of file is configured incorrectly)"
+			((count++))
+		fi
+	else
+		echo "$count. /var/log/kern.log - FAILED (Owner and group owner of file is configured incorrectly)"
+		((count++))
+	fi
+else
+	echo "$count. /var/log/kern.log - FAILED (/var/log/kern.log file does not exist)"
+	((count++))
+fi
+
