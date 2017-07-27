@@ -472,3 +472,15 @@ else
 	((count++))
 fi
 
+# 6.2.1.1 Configure Audit Log Storage Size
+checklogstoragesize=`grep max_log_file[[:space:]] /etc/audit/auditd.conf | awk '{print $3}'`
+
+if [ "$checklogstoragesize" == 5 ]
+then
+	echo "$count. Audit Log Storage Size - PASSED (Maximum size of audit log files is configured correctly)"
+	((count++))
+else
+	echo "$count. Audit Log Storage Size - FAILED (Maximum size of audit log files is not configured correctly)"
+	((count++))
+fi
+
