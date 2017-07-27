@@ -524,3 +524,15 @@ else
 	((count++))
 fi
 
+# 6.2.1.4 Enable auditd Service
+checkauditdservice=`systemctl is-enabled auditd`
+
+if [ "$checkauditdservice" == enabled ]
+then
+	echo "$count. Auditd Service - PASSED (Auditd is enabled)"
+	((count++))
+else
+	echo "$count. Auditd Service - FAILED (Auditd is not enabled)"
+	((count++))
+fi
+
