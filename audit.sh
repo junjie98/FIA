@@ -66,5 +66,20 @@ then
 else 
 	echo "$count. LDAP - FAILED (Both LDAP client and server are installed)"
 	((count++))
-fi 
+fi
 
+# 3.8 Disable NFS & RPC
+nfsservices=( "nfs-lock" "nfs-secure" "rpcbind" "nfs-idmap" "nfs-secure-server" )
+
+for eachnfsservice in ${nfsservices[*]}
+do 
+	checknfsservices=`systemctl is-enabled $eachnfsservice | grep enabled`
+	if [ -z "$checknfsservices" ]
+	then 
+		echo "$count. $eachnfsservice - PASSED ($eachnfsservice is disabled) "
+		((count++))
+	else 
+		echo "$count. $eachnfsservice - FAILED ($eachnfsservice is enabled)"
+		((count++))
+	fi
+done
