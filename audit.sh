@@ -496,3 +496,31 @@ else
 	((count++))
 fi
 
+# 6.2.1.3 Disable System on Audit Log Full
+checkspaceleftaction=`grep space_left_action /etc/audit/auditd.conf | awk '{print $3}'`
+
+if [ "$checkspaceleftaction" == email ]
+then
+	checkactionmailacc=`grep action_mail_acct /etc/audit/auditd.conf | awk '{print $3}'`
+
+	if [ "$checkactionmailacc" == root ]
+	then
+		checkadminspaceleftaction=`grep admin_space_left_action /etc/audit/auditd.conf | awk '{print $3}'`
+		
+		if [ "$checkadminspaceleftaction" == halt ]
+		then
+			echo "$count. Disable System - PASSED (Auditd is correctly configured to notify the administrator and halt the system when audit logs are full)"
+			((count++))
+		else
+			echo "$count. Disable System - FAILED (Auditd is not configured to halt the system when audit logs are full)"
+			((count++))
+		fi
+	else
+		echo "$count. Disable System - FAILED (Auditd is not configured to notify the administrator when audit logs are full)"
+		((count++))
+	fi
+else
+	echo "$count. Disable System - FAILED (Auditd is not configured to notify the administrator by email when audit logs are full)"
+	((count++))
+fi
+
