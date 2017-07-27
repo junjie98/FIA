@@ -548,3 +548,182 @@ else
 	((count++))
 fi
 
+# 6.2.1.6 - 6.2.1.8
+checksystem=`uname -m | grep "64"`
+checkmodifydatetimeadjtimex=`egrep 'adjtimex' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	echo "It is a 32-bit system."
+
+	if [ -z "$checkmodifydatetimeadjtimex" ]
+	then
+        	echo "$count. Date & Time Modified Events - FAILED (Adjtimex is not configured)"
+		((count++))
+	else
+		echo "$count. Date & Time Modified Events - PASSED (Adjtimex is configured)"
+		((count++))	
+	fi
+else
+	echo "It is a 64-bit system."
+
+	if [ -z "$checkmodifydatetimeadjtimex" ]
+	then
+        	echo "$count. Date & Time Modified Events - FAILED (Adjtimex is not configured)"
+		((count++))
+	else
+		echo "$count. Date & Time Modified Events - PASSED (Adjtimex is configured)"
+		((count++))
+	fi
+fi
+
+checkmodifydatetimesettime=`egrep 'settimeofday' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	if [ -z "$checkmodifydatetimesettime" ]
+	then
+        	echo "$count. Date & Time Modified Events - FAILED (Settimeofday is not configured)"
+		((count++))
+	else
+        	echo "$count. Date & Time Modified Events - PASSED (Settimeofday is configured)"
+		((count++))
+	fi
+else
+	if [ -z "$checkmodifydatetimesettime" ]
+	then
+        	echo "$count. Date & Time Modified Events - FAILED (Settimeofday is not configured)"
+		((count++))
+	else
+        	echo "$count. Date & Time Modified Events - PASSED (Settimeofday is configured)"
+		((count++))
+	fi
+fi
+
+checkmodifydatetimeclock=`egrep 'clock_settime' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifydatetimeclock" ]
+then
+       	echo "$count. Date & Time Modified Events - FAILED (Clock Settime is not configured)"
+	((count++))
+else
+       	echo "$count. Date & Time Modified Events - PASSED (Clock Settime is configured)"
+	((count++))
+fi
+
+checkmodifyusergroupinfo=`egrep '\/etc\/group' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusergroupinfo" ]
+then
+        echo "$count. Group Configuration - FAILED (Group is not configured)"
+	((count++))
+else
+        echo "$count. Group Configuration - PASSED (Group is already configured)"
+	((count++))
+fi
+
+checkmodifyuserpasswdinfo=`egrep '\/etc\/passwd' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyuserpasswdinfo" ]
+then
+        echo "$count. Password Configuration - FAILED (Password is not configured)"
+	((count++))
+else
+        echo "$count. Password Configuration - PASSED (Password is configured)"
+	((count++))
+fi
+
+checkmodifyusergshadowinfo=`egrep '\/etc\/gshadow' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusergshadowinfo" ]
+then
+        echo "$count. GShadow Configuration - FAILED (GShadow is not configured)"
+	((count++))
+else
+        echo "$count. GShadow Configuration - PASSED (GShadow is configured)"
+	((count++))
+fi
+
+checkmodifyusershadowinfo=`egrep '\/etc\/shadow' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusershadowinfo" ]
+then
+        echo "$count. Shadow Configuration - FAILED (Shadow is not configured)"
+	((count++))
+else
+        echo "$count. SHadow Configuration - PASSED (Shadow is configured)"
+	((count++))
+fi
+
+checkmodifyuseropasswdinfo=`egrep '\/etc\/security\/opasswd' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyuseropasswdinfo" ]
+then
+        echo "$count. OPasswd Configuration- FAILED (OPassword not configured)"
+	((count++))
+else
+        echo "$count. OPasswd Configuration - PASSED (OPassword is configured)"
+	((count++))
+fi
+
+checksystem=`uname -m | grep "64"`
+checkmodifynetworkenvironmentname=`egrep 'sethostname|setdomainname' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	echo "It is a 32-bit system."
+
+	if [ -z "$checkmodifynetworkenvironmentname" ]
+	then
+        	echo "$count. Modify the System's Network Environment Events - FAILED (Sethostname and setdomainname is not configured)"
+		((count++))
+	else
+		echo "$count. Modify the System's Network Environment Events - PASSED (Sethostname and setdomainname is configured)"
+		((count++))
+	fi
+else
+	echo "It is a 64-bit system."
+
+	if [ -z "$checkmodifynetworkenvironmentname" ]
+	then
+        	echo "$count. Modify the System's Network Environment Events - FAILED (Sethostname and setdomainname is not configured)"
+		((count++))
+	else
+		echo "$count. Modify the System's Network Environment Events - PASSED (Sethostname and setdomainname is configured)"
+		((count++))
+	fi
+fi
+
+checkmodifynetworkenvironmentissue=`egrep '\/etc\/issue' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmentissue" ]
+then
+       	echo "$count. Modify the System's Network Environment Events - FAILED (/etc/issue is not configured)"
+	((count++))
+else
+       	echo "$count. Modify the System's Network Environment Events - PASSED (/etc/issue is configured)"
+	((count++))
+fi
+
+checkmodifynetworkenvironmenthosts=`egrep '\/etc\/hosts' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmenthosts" ]
+then
+       	echo "$count. Modify the System's Network Environment Events - FAILED (/etc/hosts is not configured)"
+	((count++))
+else
+       	echo "$count. Modify the System's Network Environment Events - PASSED (/etc/hosts is configured)"
+	((count++))
+fi
+
+checkmodifynetworkenvironmentnetwork=`egrep '\/etc\/sysconfig\/network' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmentnetwork" ]
+then
+       	echo "$count. Modify the System's Network Environment Events - FAILED (/etc/sysconfig/network is not configured)"
+	((count++))
+else
+       	echo "$count. Modify the System's Network Environment Events - PASSED (/etc/sysconfig/network is configured)"
+	((count++))
+fi
+
