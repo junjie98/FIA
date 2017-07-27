@@ -96,4 +96,66 @@ then
 	systemctl disable nfs-secure-server
 fi
 
+# 3.9 Remove Services
+checkyumdns=`yum list bind | grep "Available Packages"`
+checkdns=`systemctl status named | grep inactive`
+checkdns1=`systemctl status named | grep disabled`
+if [ -z "$checkyumdns" ]
+then
+	if [ -z "$checkdns" -o -z "$checkdns1" ]
+	then
+		systemctl stop named
+		systemctl disable named
+	fi
+fi
+
+checkyumftp=`yum list vsftpd | grep "Available Packages"`
+checkftp=`systemctl status vsftpd | grep inactive`
+checkftp1=`systemctl status vsftpd | grep disabled`
+if [ -z "$checkyumftp" ]
+then
+	if [ -z "$checkftp" -o -z "$checkftp1" ]
+	then
+		systemctl stop vsftpd
+		systemctl disable vsftpd
+	fi
+fi
+
+checkyumhttp=`yum list httpd | grep "Available Packages"`
+checkhttp=`systemctl status httpd | grep inactive`
+checkhttp1=`systemctl status httpd | grep disabled`
+if [ -z "$checkyumhttp" ]
+then
+	if [ -z "$checkhttp" -o -z "$checkhttp1" ]
+	then
+		systemctl stop httpd
+		systemctl disable httpd
+	fi
+fi
+
+checkyumsquid=`yum list squid | grep "Available Packages"`
+checksquid=`systemctl status squid | grep inactive`
+checksquid1=`systemctl status squid | grep disabled`
+if [ -z "$checkyumsquid" ]
+then
+	if [ -z "$checksquid" -o -z "$checksquid1" ]
+	then
+		systemctl stop squid
+		systemctl disable squid
+	fi
+fi
+
+checkyumsnmp=`yum list net-snmp | grep "Available Packages"`
+checksnmp=`systemctl status snmpd | grep inactive`
+checksnmp1=`systemctl status snmpd | grep disabled`
+if [ -z "$checkyumsnmp" ]
+	then
+	if [ -z "$checksnmp" -o -z "$checsnmp1" ]
+	then
+		systemctl stop snmpd
+		systemctl disable snmpd
+	fi
+fi
+
+
 
