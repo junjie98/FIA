@@ -162,3 +162,23 @@ else
 	((count++))
 fi 
 
+# 4.3 Set Boot Loader Password
+checkbootloaderuser=`grep "^set superusers" /boot/grub2/grub.cfg`
+
+if [ -z "$checkbootloaderuser" ]
+then
+	echo "$count. Boot Loader Password - FAILED (Boot loader is not configured with any superuser)"
+	((count++))
+else
+	checkbootloaderpassword=`grep "^password" /boot/grub2/grub.cfg`
+
+	if [ -z "$checkbootloaderpassword" ]
+	then
+		echo "$count. Boot Loader Password - FAILED (Boot loader is not configured with a password)"
+		((count++))
+
+	else
+		echo "$count. Boot Loader Password - PASSED (Boot loader is configured with a superuser and password)"
+		((count++))
+	fi
+fi
