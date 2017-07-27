@@ -50,3 +50,50 @@ then
 	echo "1iOPTIONS=\"-u ntp:ntp -p /var/run/ntpd.pid\" " >> /etc/sysconfig/ntpd
 fi
 
+# 3.7 Remove LDAP
+checkldapclientinstalled=`yum list openldap-clients | grep "Available Packages"`
+checkldapserverinstalled=`yum list openldap-servers | grep "Available Packages"`
+
+if [ -z "$checkldapclientinstalled" ]
+then
+	yum  -y erase openldap-clients
+fi
+
+if [ -z "$checkldapserverinstalled" ]
+then
+	yum -y erase openldap-servers
+fi
+
+# 3.8 Disable NFS & RPC
+checknfslock=`systemctl is-enabled nfs-lock | grep "disabled"`
+checknfssecure=`systemctl is-enabled nfs-secure | grep "disabled"`
+checkrpcbind=`systemctl is-enabled rpcbind | grep "disabled"`
+checknfsidmap=`systemctl is-enabled nfs-idmap | grep "disabled"`
+checknfssecureserver=`systemctl is-enabled nfs-secure-server | grep "disabled"`
+
+if [ -z "$checknfslock" ]
+then
+	systemctl disable nfs-lock
+fi
+
+if [ -z "$checknfssecure" ]
+then
+	systemctl disable nfs-secure
+fi
+
+if [ -z "$checkrpcbind" ]
+then
+	systemctl disable rpcbind
+fi
+
+if [ -z "$checknfsidmap" ]
+then
+	systemctl disable nfs-idmap
+fi
+
+if [ -z "$checknfssecureserver" ]
+then
+	systemctl disable nfs-secure-server
+fi
+
+
