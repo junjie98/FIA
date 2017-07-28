@@ -163,7 +163,21 @@ checkmta=`netstat -an | grep LIST | grep "127.0.0.1:25[[:space:]]"`
 if [ -z "$checkmta" ]
 then
 	sed -ie '116iinet_interfaces = localhost' /etc/postfix/main.cf
-=======
->>>>>>> f4da9236b56a4466b9182a151648cc1bcfe86ee1
+	systemctl restart postfix
+fi
+
+# 4.1 Set User/Group Owner on /boot/grub2/grub.cfg
+checkowner=$(stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg)
+if [ "$checkowner" == "owner=root group=root" ]
+then
+	#If owner and group is configured CORRECTLY
+	printf "\nBoth owner and group belong to ROOT user : PASSED"
+	printf "\n$checkowner"
+else
+	#If owner ang group is configured INCORRECTLY
+	chown root:root /boot/grub2/grub.cfg
+	printf "\nBoth owner and group belong to ROOT user : FAILED"
+	printf "\nChanging the owner and group..."
+	printf "\nDone, Change SUCCESSFUL\n"
 fi
 
