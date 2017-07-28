@@ -434,3 +434,38 @@ else
         echo "The value is already keep_logs"
 fi
 
+# 6.2.1.3 Disable System on Audit Log Full
+checkvalue3=`grep -w "space_left_action" /etc/audit/auditd.conf | awk -F ' ' '{print $3}'`
+if [ "$checkvalue3" != "email" ]
+then
+        sed -i '20d' /etc/audit/auditd.conf
+        sed -ie '20ispace_left_action = email' /etc/audit/auditd.conf
+        echo "Change SUCCESS"
+else
+        echo "The value is already email"
+fi
+
+printf "\n"
+
+checkvalue4=`grep -w "action_mail_acct" /etc/audit/auditd.conf | awk -F ' ' '{print $3}'`
+if [ "$checkvalue4" != "root" ]
+then
+        sed -i '21d' /etc/audit/auditd.conf
+        sed -ie '21action_mail_acct = root' /etc/audit/auditd.conf
+        echo "Change SUCCESS"
+else
+        echo "The value is already root"
+fi
+
+printf "\n"
+
+checkvalue5=`grep -w "admin_space_left_action" /etc/audit/auditd.conf | awk -F ' ' '{print $3}'`
+if [ "$checkvalue5" != "halt" ]
+then
+        sed -i '23d' /etc/audit/auditd.conf
+        sed -ie '23admin_space_left_action = halt' /etc/audit/auditd.conf
+        echo "Change is SUCCESSFUL"
+else
+        echo "The value is already halt"
+fi
+
