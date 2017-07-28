@@ -201,13 +201,13 @@ user=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '
 if [ "$checkboot" == "root" ]
 then
 	#If the configuration is CORRECT
-	printf "\nBoot Loader Settings : PASSED"
-	printf "\nThe following are the superusers: "
-	printf "$user\n\n"
+	echo "Boot Loader Settings : PASSED"
+	echo "The following are the superusers: "
+	echo "$user"
 else
 	#If the configuration is INCORRECT
-	printf "\nBoot Loader Settings : FAILED"
-	printf "\nConfiguring Boot Loader Settings..."
+	echo "Boot Loader Settings : FAILED"
+	echo "Configuring Boot Loader Settings..."
 	touch /etc/bootloader.txt
 	printf "password\npassword" > /etc/bootloader.txt
 	grub2-mkpasswd-pbkdf2 < /etc/bootloader.txt > boot.md5
@@ -219,12 +219,25 @@ else
 	printf "$ans\n" >> /etc/grub.d/00_header
 	printf "EOF" >> /etc/grub.d/00_header
 	grub2-mkconfig -o /boot/grub2/grub.cfg
-	printf "\nDone, Change SUCCESSFUL\n"
-	printf "\n"
+	echo "Done, Change SUCCESSFUL"
 	newuser=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '{print $2}'`
 
-	printf "\nThe following are the superusers: "
-	printf "$newuser\n\n"
+	echo "The following are the superusers: "
+	echo "$newuser"
 fi
 
+# 5.1 Restrict Core Dumps
+checkcoredump=`grep "hard core" /etc/security/limits.conf`
+if [ -z "$checkcoredump" ]
+then
+	#If it is configured INCORRECTLY
+	echo "Hard Limit Settings : FAILED"
+	echo "* hard core 0" >> /etc/security/limits.conf
+	echo "fd.suid_dumpable = 0" >> /etc/sysctl.conf
+	echo "Configuring settings...."
+	echo "Done, Change SUCCESSFUL"
+else
+	#If it is configured CORRECTLY
+	echo "Hard Limit Settings : PASSED"
+fi
 
