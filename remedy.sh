@@ -630,3 +630,75 @@ else
 fi
 
 service auditd restart
+
+# 6.2.1.8 Record Events That Modify the System's Network Environment
+checkmodifynetworkenvironmentname=`egrep 'sethostname|setdomainname' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	echo "It is a 32-bit system."
+
+	if [ -z "$checkmodifynetworkenvironmentname" ]
+	then
+        	echo "Modify the System's Network Environment Events - FAILED (Sethostname and setdomainname is not configured)"
+        	echo "-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/audit.rules
+        	echo "Sethostname and setdomainname is now configured"
+	else
+		echo "Modify the System's Network Environment Events - PASSED (Sethostname and setdomainname is configured)"
+	fi
+else
+	echo "It is a 64-bit system."
+
+	if [ -z "$checkmodifynetworkenvironmentname" ]
+	then
+        	echo "Modify the System's Network Environment Events - FAILED (Sethostname and setdomainname is not configured)"
+        	echo "-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/audit.rules
+		echo "-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale" >> /etc/audit/audit.rules
+        	echo "Sethostname is now configured"
+	else
+		echo "Modify the System's Network Environment Events - PASSED (Sethostname and setdomainname is configured)"
+	fi
+fi
+
+checkmodifynetworkenvironmentissue=`egrep '\/etc\/issue' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmentissue" ]
+then
+       	echo "Modify the System's Network Environment Events - FAILED (/etc/issue is not configured)"
+       	echo "-w /etc/issue -p wa -k system-locale" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/issue -p wa -k system-locale" >> /etc/audit/audit.rules
+       	echo "-w /etc/issue.net -p wa -k system-locale" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/issue.net -p wa -k system-locale" >> /etc/audit/audit.rules
+       	echo "/etc/issue is now configured"
+else
+       	echo "Modify the System's Network Environment Events - PASSED (/etc/issue is configured)"
+fi
+
+checkmodifynetworkenvironmenthosts=`egrep '\/etc\/hosts' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmenthosts" ]
+then
+       	echo "Modify the System's Network Environment Events - FAILED (/etc/hosts is not configured)"
+       	echo "-w /etc/hosts -p wa -k system-locale" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/hosts -p wa -k system-locale" >> /etc/audit/audit.rules
+       	echo "/etc/hosts is now configured"
+else
+       	echo "Modify the System's Network Environment Events - PASSED (/etc/hosts is configured)"
+fi
+
+checkmodifynetworkenvironmentnetwork=`egrep '\/etc\/sysconfig\/network' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifynetworkenvironmentnetwork" ]
+then
+       	echo "Modify the System's Network Environment Events - FAILED (/etc/sysconfig/network is not configured)"
+       	echo "-w /etc/sysconfig/network -p wa -k system-locale" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/sysconfig/network -p wa -k system-locale" >> /etc/audit/audit.rules
+       	echo "/etc/sysconfig/network is now configured"
+else
+       	echo "Modify the System's Network Environment Events - PASSED (/etc/sysconfig/network is configured)"
+fi
+
+service auditd restart
