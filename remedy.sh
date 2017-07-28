@@ -469,3 +469,15 @@ else
         echo "The value is already halt"
 fi
 
+# 6.2.1.4 Enable auditd Service
+checkauditdservice=`systemctl is-enabled auditd`
+
+if [ "$checkauditdservice" == enabled ]
+then
+	echo "Auditd is already enabled"
+else
+	echo "Auditd is not enabled"
+	systemctl enable auditd
+	echo "Auditd Service is now enabled"
+fi
+
