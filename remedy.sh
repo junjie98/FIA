@@ -386,4 +386,29 @@ else
 	echo "$checkloghost is the Remote Log Host"
 fi
 
+# 6.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts
+checkmodload=`cat /etc/rsyslog.conf | grep "^ModLoad imtcp"`
+checkinput=`cat /etc/rsyslog.conf | grep "^InputTCPServerRun"`
+if [ "$checkmodload" == "" ]
+then
+	#If the string has not been commented out
+	echo "ModLoad imtcp is up? : PASSED"
+else
+	# If the thing has been commented out
+	echo "ModLoad imtcp is up? : FAILED"
+	echo "Setting configuration..."
+	printf "\n\$ModLoad imtcp.so" >> /etc/rsyslog.conf
+	echo "Change SUCCESS"
+fi
+if [ "$checkinput" == "" ]
+then
+	#If the string has not been commented out
+        echo "InputTCPServerRun is up? : PASSED"
+else
+	# If the string has been commented out
+        echo "InputTCPServerRun is up? : FAILED"
+        echo "Setting configuration..."
+	printf "\n\$InputTCPServerRun 514" >> /etc/rsyslog.conf
+        echo "Change SUCCESS"
+fi
 
