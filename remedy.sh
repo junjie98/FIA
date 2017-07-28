@@ -222,8 +222,7 @@ else
 	echo "Done, Change SUCCESSFUL"
 	newuser=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '{print $2}'`
 
-	echo "The following are the superusers: "
-	echo "$newuser"
+	echo "The following are the superusers: $newuser"
 fi
 
 # 5.1 Restrict Core Dumps
@@ -239,5 +238,23 @@ then
 else
 	#If it is configured CORRECTLY
 	echo "Hard Limit Settings : PASSED"
+fi
+
+# 5.2 Enable Randomized Virtual Memory Region Placement
+checkkernel=`sysctl kernel.randomize_va_space`
+checkkerneldeep=`sysctl kernel.randomize_va_space | awk -F ' ' '{print $3}'`
+if [ "$checkkerneldeep" == 2 ]
+then
+	#If the configurations are CORRECT
+	echo "Virtual Memory Randomization Settings : PASSED"
+	echo "Randomization of Virtual Memory : $checkkernel"
+else
+	#If the configuratiions are INCORRECT
+	echo "Virtual Memory Randomization Settings : FAILED"
+	echo 2 > /proc/sys/kernel/randomize_va_space
+	echo "Configuring settings...."
+	echo "Done, Change SUCCESSFUL"
+	newcheckkernel=`sysctl kernel.randomize_va_space`
+	echo "New Randomization of Virtual Memory : $newcheckkernel"
 fi
 
