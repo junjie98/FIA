@@ -258,3 +258,15 @@ else
 	echo "New Randomization of Virtual Memory : $newcheckkernel"
 fi
 
+# 6.1.1 Install the rsyslog package
+# 6.1.2 Activate the rsyslog Service
+checkrsyslog=`rpm -q rsyslog`
+if [ "$checkrsyslog" == rsyslog-7.4.7-16.el7.x86_64 ]
+then
+	echo "rsyslog installed"
+else
+	echo "Not installed, installing now"
+	yum install -y rsyslog
+	systemctl enable rsyslog
+	systemctl start rsyslog
+fi
