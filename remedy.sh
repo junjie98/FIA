@@ -702,3 +702,16 @@ else
 fi
 
 service auditd restart
+
+# 6.2.1.9 Record Events That Modify the System's Mandatory Access Controls
+var=`grep \/etc\/selinux /etc/audit/audit.rules`
+if [ -z "$var" ]
+then
+	echo "Record Events That Modify the System's Mandatory Access Controls - FAILED"
+	echo "-w /etc/selinux/ -p wa -k MAC-policy" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/selinux/ -p wa -k MAC-policy" >> /etc/audit/audit.rules
+else
+	echo "It is being recorded"
+fi
+
+service auditd restart
