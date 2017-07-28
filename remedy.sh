@@ -167,31 +167,64 @@ then
 fi
 
 # 4.1 Set User/Group Owner on /boot/grub2/grub.cfg
-checkowner=$(stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg)
+checkowner=`stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg`
 if [ "$checkowner" == "owner=root group=root" ]
 then
 	#If owner and group is configured CORRECTLY
-	printf "\nBoth owner and group belong to ROOT user : PASSED"
-	printf "\n$checkowner"
+	echo "Both owner and group belong to ROOT user : PASSED"
+	echo "$checkowner"
 else
 	#If owner ang group is configured INCORRECTLY
 	chown root:root /boot/grub2/grub.cfg
-	printf "\nBoth owner and group belong to ROOT user : FAILED"
-	printf "\nChanging the owner and group..."
-	printf "\nDone, Change SUCCESSFUL\n"
+	echo "Both owner and group belong to ROOT user : FAILED"
+	echo "Changing the owner and group..."
+	echo "Done, Change SUCCESSFUL\n"
 fi
 
 # 4.2 Set Permissions on /boot/grub2/grub.cfg
-checkpermission=$(stat -L -c "%a" /boot/grub2/grub.cfg | cut -c 2,3)
+checkpermission=`stat -L -c "%a" /boot/grub2/grub.cfg | cut -c 2,3`
 if [ "$checkpermission" == 00 ]
 then
 	#If the permission is configured CORRECTLY
-	printf "\nConfiguration of Permission: PASSED"
+	echo "Configuration of Permission: PASSED"
 else
 	#If the permission is configured INCORRECTLY
-	printf "\nConfiguration of Permission: FAIlED"
-	printf "\nChanging configuration..."
+	echo "Configuration of Permission: FAIlED"
+	echo "Changing configuration..."
 	chmod og-rwx /boot/grub2/grub.cfg
-	printf "\nDone, Change SUCCESSFUL\n"
+	echo "Done, Change SUCCESSFUL"
 fi
+
+# 4.3 Set Boot Loader Password
+checkboot=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '{print $2}' | tr -d '"'`
+user=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '{print $2}'`
+if [ "$checkboot" == "root" ]
+then
+	#If the configuration is CORRECT
+	printf "\nBoot Loader Settings : PASSED"
+	printf "\nThe following are the superusers: "
+	printf "$user\n\n"
+else
+	#If the configuration is INCORRECT
+	printf "\nBoot Loader Settings : FAILED"
+	printf "\nConfiguring Boot Loader Settings..."
+	touch /etc/bootloader.txt
+	printf "password\npassword" > /etc/bootloader.txt
+	grub2-mkpasswd-pbkdf2 < /etc/bootloader.txt > boot.md5
+	printf "\n" >> /etc/grub.d/00_header
+	printf "cat<<EOF\n" >> /etc/grub.d/00_header
+	printf "set superusers=\"root\"\n" >> /etc/grub.d/00_header
+	printf "password_pbkdf2 root " >> /etc/grub.d/00_header
+	ans=`cat boot.md5 | grep "grub" | awk -F ' ' '{print $7}'`
+	printf "$ans\n" >> /etc/grub.d/00_header
+	printf "EOF" >> /etc/grub.d/00_header
+	grub2-mkconfig -o /boot/grub2/grub.cfg
+	printf "\nDone, Change SUCCESSFUL\n"
+	printf "\n"
+	newuser=`grep "set superusers" /boot/grub2/grub.cfg | sort | head -1 | awk -F '=' '{print $2}'`
+
+	printf "\nThe following are the superusers: "
+	printf "$newuser\n\n"
+fi
+
 
