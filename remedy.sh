@@ -270,3 +270,86 @@ else
 	systemctl enable rsyslog
 	systemctl start rsyslog
 fi
+
+# 6.1.3 Configure /etc/rsyslog.conf
+checkmessages=`cat /etc/rsyslog.conf | grep "/var/log/messages" | awk -F ' ' '{print $1}'`
+if [ "$checkmessages" != "auth,user.*" ]
+then
+	#Change it here (If it is not a null)
+	if [ -n "$checkmessages" ]
+	then
+		sed -i /$checkmessages/d /etc/rsyslog.conf
+	fi
+		printf "\nauth,user.*	/var/log/messages" >> /etc/rsyslog.conf
+		systemctl restart rsyslog
+		echo "Change SUCCESS"
+else
+	#Correct
+	echo "/var/log/messages : Exists"
+fi 
+
+checkkern=`cat /etc/rsyslog.conf | grep "/var/log/kern.log" | awk -F ' ' '{print $1}'`
+if [ "$checkkern" != "kern.*" ]
+then
+        #Change it here
+	if [ -n "$checkkern" ]
+	then
+        	sed -i /$checkkern/d /etc/rsyslog.conf
+	fi
+		printf "\nkern.*   /var/log/kern.log" >> /etc/rsyslog.conf
+		systemctl restart rsyslog
+		echo "Change SUCCESS"
+else
+        #Correct
+        echo "/var/log/kern.log : Exists"
+fi 
+
+checkdaemon=`cat /etc/rsyslog.conf | grep "/var/log/daemon.log" | awk -F ' ' '{print $1}'`
+if [ "$checkdaemon" != "daemon.*" ]
+then
+        #Change it here
+	if [ -n "$checkdaemon" ]
+	then
+        	sed -i /$checkdaemon/d /etc/rsyslog.conf
+        fi
+		printf "\ndaemon.*   /var/log/daemon.log" >> /etc/rsyslog.conf
+		systemctl restart rsyslog
+		echo "Change SUCCESS"
+else
+        #Correct
+        echo "/var/log/daemon.log : Exists"
+fi 
+
+checksyslog=`cat /etc/rsyslog.conf | grep "/var/log/syslog.log" | awk -F ' ' '{print $1}'`
+if [ "$checksyslog" != "syslog.*" ]
+then
+        #Change it here
+	if [ -n "$checksyslog" ]
+	then
+        	sed -i /$checksyslog/d /etc/rsyslog.conf
+	fi
+		printf "\nsyslog.*   /var/log/syslog.log" >> /etc/rsyslog.conf
+		systemctl restart rsyslog
+		echo "Change SUCCESS"
+else
+        #Correct
+        echo "/var/log/syslog.log : Exists"
+fi 
+
+checkunused=`cat /etc/rsyslog.conf | grep "/var/log/unused.log" | awk -F ' ' '{print $1}'`
+if [ "$checkunused" != "lpr,news,uucp,local0,local1,local2,local3,local4,local5,local6.*" ]
+then
+        #Change it here
+	if [ -n "$checkunused" ]
+	then
+        	sed -i /$checkunused/d /etc/rsyslog.conf
+        fi
+		printf "\nlpr,news,uucp,local0,local1,local2,local3,local4,local5,local6.*   /var/log/unused.log" >> /etc/rsyslog.conf
+		systemctl restart rsyslog
+		echo "Change SUCCESS"
+else
+        #Correct
+        echo "/var/log/unused.log : Exists"
+fi 
+
+
