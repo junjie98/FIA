@@ -423,3 +423,14 @@ else
 	echo "The value is already 5"
 fi
 
+# 6.2.1.2 Keep All Auditing Information
+checkvalue2=`grep -w "max_log_file_action" /etc/audit/auditd.conf | awk -F ' ' '{print $3}'`
+if [ "$checkvalue2" != "keep_logs" ]
+then
+	sed -i '18d' /etc/audit/auditd.conf
+        sed -ie '18imax_log_file_action = keep_logs' /etc/audit/auditd.conf
+        echo "Change SUCCESS"
+else
+        echo "The value is already keep_logs"
+fi
+
