@@ -352,4 +352,27 @@ else
         echo "/var/log/unused.log : Exists"
 fi 
 
+# 6.1.4 Create and Set Permissions on rsyslog Log Files
+names=`cat /etc/rsyslog.conf | grep "/var/log" | awk -F ' ' '{print $2}'`
+for dir in "$names"
+do
+	if [ -d "$dir" ]
+	then
+		#Create the directory
+		touch "$dir"
+	fi
+		check=`ls -l /var/log/messages | awk -F ' ' '{print $3,$4}'`
+	if [ "$check" == "root root" ]
+	then
+		#Configured correctly
+		echo "Directory has been correctly configured"
+	else
+		#Configured wrongly
+		echo "Directory has been configured wrongly"
+		chown root:root "$dir"
+                chmod og-rwx "$dir"
+		echo "Changing configurations..."
+		echo "Done, Change is SUCCESSFUL"
+	fi
+done
 
