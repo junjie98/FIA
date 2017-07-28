@@ -376,3 +376,14 @@ do
 	fi
 done
 
+# 6.1.5 Configure rsyslog to Send Logs to a Remote Log Host
+checkloghost=`grep "^*.*[^|][^|]*@" /etc/rsyslog.conf`
+if [ -z "$checkloghost" ]  # If there is no log host
+then
+	echo "*.* @@logfile.example.com"
+	echo "Remote Log Host has been configured"
+else
+	echo "$checkloghost is the Remote Log Host"
+fi
+
+
