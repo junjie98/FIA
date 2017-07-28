@@ -568,3 +568,65 @@ fi
 
 service auditd restart
 
+# 6.2.1.7 Record Events That Modify User/Group Information
+checkmodifyusergroupinfo=`egrep '\/etc\/group' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusergroupinfo" ]
+then
+        echo "Group Configuration - FAILED (Group is not configured)"
+        echo "-w /etc/group -p wa -k identity" >> /etc/audit/audit.rules
+	echo "-w /etc/group -p wa -k identity" >> /etc/audit/rules.d/audit.rules
+        echo "Group is now configured"
+else
+        echo "Group Configuration - PASSED (Group is already configured)"
+fi
+
+checkmodifyuserpasswdinfo=`egrep '\/etc\/passwd' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyuserpasswdinfo" ]
+then
+        echo "Password Configuration - FAILED (Password is not configured)"
+        echo "-w /etc/passwd -p wa -k identity" >> /etc/audit/audit.rules
+	echo "-w /etc/passwd -p wa -k identity" >> /etc/audit/rules.d/audit.rules
+        echo "Password is now configured"
+else
+        echo "Password Configuration - PASSED (Password is configured)"
+fi
+
+checkmodifyusergshadowinfo=`egrep '\/etc\/gshadow' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusergshadowinfo" ]
+then
+        echo "GShadow Configuration - FAILED (GShadow is not configured)"
+        echo "-w /etc/gshadow -p wa -k identity" >> /etc/audit/audit.rules
+	echo "-w /etc/gshadow -p wa -k identity" >> /etc/audit/rules.d/audit.rules
+        echo "GShadow is now configured"
+else
+        echo "GShadow Configuration - PASSED (GShadow is configured)"
+fi
+
+checkmodifyusershadowinfo=`egrep '\/etc\/shadow' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyusershadowinfo" ]
+then
+        echo "Shadow Configuration - FAILED (Shadow is not configured)"
+        echo "-w /etc/shadow -p -k identity" >> /etc/audit/audit.rules
+	echo "-w /etc/shadow -p -k identity" >> /etc/audit/rules.d/audit.rules
+        echo "Shadow is now configured"
+else
+        echo "Shadow Configuration - PASSED (Shadow is configured)"
+fi
+
+checkmodifyuseropasswdinfo=`egrep '\/etc\/security\/opasswd' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifyuseropasswdinfo" ]
+then
+        echo "OPasswd Configuration- FAILED (OPassword not configured)"
+        echo "-w /etc/security/opasswd -p wa -k identity" >> /etc/audit/audit.rules
+	echo "-w /etc/security/opasswd -p wa -k identity" >> /etc/audit/rules.d/audit.rules
+        echo "OPassword is now configured"
+else
+        echo "OPasswd Configuration - PASSED (OPassword is configured)"
+fi
+
+service auditd restart
