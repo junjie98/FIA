@@ -451,7 +451,7 @@ checkvalue4=`grep -w "action_mail_acct" /etc/audit/auditd.conf | awk -F ' ' '{pr
 if [ "$checkvalue4" != "root" ]
 then
         sed -i '21d' /etc/audit/auditd.conf
-        sed -ie '21action_mail_acct = root' /etc/audit/auditd.conf
+        sed -ie '21iaction_mail_acct = root' /etc/audit/auditd.conf
         echo "Change SUCCESS"
 else
         echo "The value is already root"
@@ -463,7 +463,7 @@ checkvalue5=`grep -w "admin_space_left_action" /etc/audit/auditd.conf | awk -F '
 if [ "$checkvalue5" != "halt" ]
 then
         sed -i '23d' /etc/audit/auditd.conf
-        sed -ie '23admin_space_left_action = halt' /etc/audit/auditd.conf
+        sed -ie '23iadmin_space_left_action = halt' /etc/audit/auditd.conf
         echo "Change is SUCCESSFUL"
 else
         echo "The value is already halt"
@@ -493,4 +493,78 @@ else
 fi
 
 grub2-mkconfig -o /boot/grub2/grub.cfg
+
+# 6.2.1.6 Record Events That Modify Date and Time Information
+checksystem=`uname -m | grep "64"`
+checkmodifydatetimeadjtimex=`egrep 'adjtimex' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	echo "It is a 32-bit system."
+
+	if [ -z "$checkmodifydatetimeadjtimex" ]
+	then
+        	echo "Date & Time Modified Events - FAILED (Adjtimex is not configured)"
+        	echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change" >> /etc/audit/audit.rules
+        	echo "Adjtimex is now configured"
+	else
+		echo "Date & Time Modified Events - PASSED (Adjtimex is configured)"
+	fi
+else
+	echo "It is a 64-bit system."
+
+	if [ -z "$checkmodifydatetimeadjtimex" ]
+	then
+        	echo "Date & Time Modified Events - FAILED (Adjtimex is not configured)"
+		echo "-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change" >> /etc/audit/audit.rules
+       		echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change" >> /etc/audit/audit.rules
+        	echo "Adjtimex is now configured"
+	else
+		echo "Date & Time Modified Events - PASSED (Adjtimex is configured)"
+	fi
+fi
+
+checkmodifydatetimesettime=`egrep 'clock_settime' /etc/audit/audit.rules`
+
+if [ -z "$checksystem" ]
+then
+	if [ -z "$checkmodifydatetimesettime" ]
+	then
+        	echo "Date & Time Modified Events - FAILED (Settimeofday is not configured)"
+        	echo "-a always,exit -F arch=b32 -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S clock_settime -k time-change" >> /etc/audit/audit.rules
+        	echo "Clock set time is now configured"
+	else
+        	echo "Date & Time Modified Events - PASSED (Clock set time is configured)"
+	fi
+else
+	if [ -z "$checkmodifydatetimesettime" ]
+	then
+        	echo "Date & Time Modified Events - FAILED (Clock set time is not configured)"
+		echo "-a always,exit -F arch=b64 -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b64 -S clock_settime -k time-change" >> /etc/audit/audit.rules
+        	echo "-a always,exit -F arch=b32 -S clock_settime -k time-change" >> /etc/audit/rules.d/audit.rules
+		echo "-a always,exit -F arch=b32 -S clock_settime -k time-change" >> /etc/audit/audit.rules
+        	echo "Clock set time is now configured"
+	else
+        	echo "Date & Time Modified Events - PASSED (Clock set time is configured)"
+	fi
+fi
+
+checkmodifydatetimeclock=`egrep '/etc/localtime' /etc/audit/audit.rules`
+
+if [ -z "$checkmodifydatetimeclock" ]
+then
+       	echo "Date & Time Modified Events - FAILED (/etc/localtime is not configured)"
+       	echo "-w /etc/localtime -p wa -k time-change" >> /etc/audit/rules.d/audit.rules
+	echo "-w /etc/localtime -p wa -k time-change" >> /etc/audit/audit.rules
+       	echo "/etc/localtime is now configured"
+else
+       	echo "Date & Time Modified Events - PASSED (/etc/localtime is configured)"
+fi
+
+service auditd restart
 
