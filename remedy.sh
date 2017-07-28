@@ -481,3 +481,16 @@ else
 	echo "Auditd Service is now enabled"
 fi
 
+# 6.2.1.5 Enable Auditing for Processes That Start Prior to auditd
+checkgrub=`grep "linux" /boot/grub2/grub.cfg | grep "audit=1"`
+if [ -z "$checkgrub"  ]
+then
+	var="GRUB_CMDLINE_LINUX"
+	sed -i /$var/d /etc/default/grub
+	printf "\nGRUB_CMDLINE_LINUX=\"audit=1\"" >> /etc/default/grub
+else
+	echo "audit 1 is present"
+fi
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
