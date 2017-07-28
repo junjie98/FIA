@@ -412,3 +412,14 @@ else
         echo "Change SUCCESS"
 fi
 
+# 6.2.1.1 Configure Audit Log Storage Size
+checkvalue=`grep -w "max_log_file" /etc/audit/auditd.conf | awk -F ' ' '{print $3}'`
+if [ "$checkvalue" != "5" ]
+then
+	sed -i /$checkvalue/d /etc/audit/auditd.conf
+	printf "max_log_file = 5" >> /etc/audit/auditd.conf
+	echo "Change SUCCESS"
+else
+	echo "The value is already 5"
+fi
+
