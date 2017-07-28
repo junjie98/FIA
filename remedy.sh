@@ -181,3 +181,17 @@ else
 	printf "\nDone, Change SUCCESSFUL\n"
 fi
 
+# 4.2 Set Permissions on /boot/grub2/grub.cfg
+checkpermission=$(stat -L -c "%a" /boot/grub2/grub.cfg | cut -c 2,3)
+if [ "$checkpermission" == 00 ]
+then
+	#If the permission is configured CORRECTLY
+	printf "\nConfiguration of Permission: PASSED"
+else
+	#If the permission is configured INCORRECTLY
+	printf "\nConfiguration of Permission: FAIlED"
+	printf "\nChanging configuration..."
+	chmod og-rwx /boot/grub2/grub.cfg
+	printf "\nDone, Change SUCCESSFUL\n"
+fi
+
