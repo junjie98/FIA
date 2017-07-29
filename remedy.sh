@@ -1,5 +1,7 @@
 #!/bin/bash
-
+# Remedy Script for RHEL 7 based on CIS BenchMarks
+# Script misc. section
+ 
 trap '' 2 20
 trap '' SIGTSTP
 
@@ -8,6 +10,8 @@ if [ "$EUID" -ne 0 ]
 	then echo "Please run this script as root"
 	exit
 fi
+
+datetime=`date +"%m%d%y-%H%M"`
 
 # 1.1 Create seperate partition for /tmp
 checkforsdb1lvm=`fdisk -l | grep /dev/sdb1 | grep "Linux LVM"`
