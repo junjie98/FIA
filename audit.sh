@@ -651,7 +651,7 @@ then
         echo "$count. Shadow Configuration - FAILED (Shadow is not configured)"
 	((count++))
 else
-        echo "$count. SHadow Configuration - PASSED (Shadow is configured)"
+        echo "$count. Shadow Configuration - PASSED (Shadow is configured)"
 	((count++))
 fi
 
