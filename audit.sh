@@ -1801,7 +1801,7 @@ do
 
 		if [[ $nameCounter < 1 ]]
 		then
-			echo "$count. User '$f1' is not a system account but has a reserved UID of $f3"
+			echo "$count. User '$f1' is not a system account but has a reserved UID of $f3 - FAILED"
 			((count++))
 		else
 			echo "$count. User '$f1' with UID of $f3 - PASSED"
