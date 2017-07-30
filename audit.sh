@@ -20,7 +20,7 @@ if [ -z "$checktmp" ]
 then
 	echo "1. /tmp - FAILED (A separate /tmp partition has not been created.)"
 else
-	checknodev=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nodev` # 1.2 Set nodev option for partition
+	checknodev=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nodev` # 1.2 Set nodev option for /tmp partition
 	checknodev1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nodev`  
 	if [ -z "$checknodev" -a -z "$checknodev1" ]
 	then
@@ -32,7 +32,7 @@ else
 	then
 		echo "1. /tmp - FAILED (/tmp currently not mounted with nodev option)"
 	else
-		checknosuid=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nosuid` # 1.3 Set nosuid option for partition
+		checknosuid=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nosuid` # 1.3 Set nosuid option for /tmp partition
 		checknosuid1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nosuid`
 		if [ -z "$checknosuid" -a -z "$checknosuid1" ]
 		then
@@ -44,7 +44,7 @@ else
 		then
 			echo "1. /tmp - FAILED (/tmp currently not mounted with nosuid option)"
 		else	
-			checknoexec=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep noexec` # 1.4 Set noexec option for partition
+			checknoexec=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep noexec` # 1.4 Set noexec option for /tmp 	partition
 			checknoexec1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep noexec`
 			if [ -z "$checknoexec" -a -z "$checknoexec1" ]
 			then
@@ -87,7 +87,7 @@ else
 	echo "3. /var/tmp - PASSED (/var/tmp has been binded and mounted to /tmp)"
 fi
 
-# 1.7 Set nosuid option for partition
+# 1.7 Create Separate Partition for /var/log
 checkvarlog=`grep "[[:space:]]/var/log[[:space:]]" /etc/fstab`
 if [ -z "$checkvarlog" ]
 then
@@ -128,13 +128,13 @@ else
 	fi
 fi
 
-# 1.11 Add nodev option to removable media partitions
+
 cdcheck=`grep cd /etc/fstab` 
 if [ -n "$cdcheck" ]
 then
-	cdnodevcheck=`grep cdrom /etc/fstab | grep nodev` # 1.12 Add noexec option to removable media partitions
+	cdnodevcheck=`grep cdrom /etc/fstab | grep nodev` # 1.11 Add nodev option to removable media partitions
 	cdnosuidcheck=`grep cdrom /etc/fstab | grep nosuid` # 1.13 Add nosuid option to removable media partitions
-	cdnosuidcheck=`grep cdrom /etc/fstab | grep noexec` # 1.14 
+	cdnosuidcheck=`grep cdrom /etc/fstab | grep noexec` # 1.12 Add noexec option to removable media partitions
 	if [ -z "$cdnosuidcheck" ]
 	then
 			echo "7. /cdrom - FAILED (/cdrom not mounted with nodev option)"
@@ -268,7 +268,7 @@ fi
 		((count++))
 	fi
 	
-	# 3.4 Disable print server - cups
+# 3.4 Disable print server - cups
 	checkcups=`systemctl status cups | grep inactive`
 	checkcups1=`systemctl status cups | grep disabled`
 	
@@ -775,6 +775,18 @@ else
 	echo "$count. /var/log/unused.log - FAILED (/var/log/unused.log file does not exist)"
 	((count++))
 fi
+
+# 6.1.5
+echo -e "\e[4m6.1.5 : Configure rsyslogto Send Logs to a Remote Log Host\e[0m\n"
+checkloghost=$(grep "^*.*[^|][^|]*@" /etc/rsyslog.conf)
+if [ -z "$checkloghost" ]  # If there is no log host
+then
+	printf "Remote Log Host : FAILED (Remote log host has not been configured)\n"
+else
+	printf "Remote Log Host : PASSED (Remote log host has been configured)\n"
+fi
+
+printf "\n\n"
 
 # 6.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts
 checkrsysloglis=`grep '^$ModLoad imtcp.so' /etc/rsyslog.conf`
@@ -1722,6 +1734,79 @@ done
 printf "\n"
 echo "Warning Banners"
 count=1
+
+#7.20 - Check that reserved UIDs are assigned to only system accounts
+echo "7.20 Check that reserved UIDs are assigned to only system accounts."
+
+systemaccount=(root bin daemon adm lp sync shutdown halt mail news uucp operator games gopher ftp nobody nscd vcsa rpc mailnull smmsp pcap ntp dbus avahi sshd rpcuser nfsnobody haldaemon avahi-autoipd distcache apache oprofile webalizer dovecot squid named xfs gdm sabayon usbmuxd rtkit abrt saslauth pulse postfix tcpdump systemd-network tss radvd [51]=qemu)
+
+nameCounter=0
+systemNameFile="/etc/passwd"
+while IFS=: read -r f1 f2 f3 f4 f5 f6 f7
+do
+	if [[ $f3 -lt 500 ]]
+	then
+		for i in ${systemaccount[*]}
+		do
+			if [[ $f1 == $i ]]
+			then
+				nameCounter=$((nameCounter+1))
+			else
+				nameCounter=$((nameCounter+0))
+			fi
+		done
+
+		if [[ $nameCounter < 1 ]]
+		then
+			echo "User '$f1' is not a system account but has a reserved UID of $f3."
+		fi
+		nameCounter=0
+	fi
+done <"$systemNameFile"
+
+#7.21 - Duplicate User Names
+echo ""
+
+echo "7.21 Check for duplicate user names."
+
+cat /etc/passwd | cut -f1 -d":" | /bin/sort -n | /usr/bin/uniq -c |
+while read x ; do
+[ -z "${x}" ] && break
+set - $x
+if [ $1 -gt 1 ]; then
+uids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/passwd | xargs`
+echo "There are $1 duplicate user name titled '$2' found in the system and its respective UIDs are ${uids}."
+fi
+done
+
+
+#7.22 - Duplicate Group Names
+echo ""
+
+echo "7.22 Check for duplicate group names."
+
+cat /etc/group | cut -f1 -d":" | /bin/sort -n | /usr/bin/uniq -c | 
+while read x ; do
+[ -z "${x}" ] && break
+set - $x
+if [ $1 -gt 1 ]; then
+gids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/group | xargs`
+echo "There are $1 duplicate group name titled '$2' found in the system and its respective UIDs are ${gids}."
+fi
+done
+
+
+#7.23 - Check for presence of user .forward files
+echo ""
+
+echo "7.23 Check for presence of user ./forward files."
+
+for dir in `/bin/cat /etc/passwd | /bin/awk -F: '{ print $6 }'`; do
+if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then 
+echo ".forward file titled '$dir/.forward' found in the system."
+fi
+done
+
 # 8.1 Set Warning Banner for Standard Login Services
 current=`cat /etc/motd`
 
@@ -2263,6 +2348,7 @@ fi
 printf "\n"
 count=1
 echo "Configure PAM"
+
 #11.1
 checkPassAlgo=`authconfig --test | grep hashing | grep sha512`
 checkPassRegex=".*sha512"
