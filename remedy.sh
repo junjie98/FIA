@@ -1249,14 +1249,17 @@ if [ -z "$loginfail" -o -z "$loginlast" -o -z "$logintally" ]
 then
 	if [ -z "$loginfail" ]
 	then
+		echo "-w /var/log/faillog -p wa -k logins" >> /etc/audit/rules.d/audit.rules
 		echo "-w /var/log/faillog -p wa -k logins" >> /etc/audit/audit.rules
 	fi
 	if [ -z "$loginlast" ]
 	then
+		echo "-w /var/log/lastlog -p wa -k logins" >> /etc/audit/rules.d/audit.rules		
 		echo "-w /var/log/lastlog -p wa -k logins" >> /etc/audit/audit.rules
 	fi
 	if [ -z "$logintally" ]
 	then
+		echo "-w /var/log/tallylog -p wa -k logins" >> /etc/audit/rules.d/audit.rules
 		echo "-w /var/log/tallylog -p wa -k logins" >> /etc/audit/audit.rules
 	fi
 fi
