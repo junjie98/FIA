@@ -1141,9 +1141,11 @@ checkpriviledgenotinfile=`grep -F -x -v -f /tmp/2.log /tmp/1.log`
 
 if [ -n "$checkpriviledgenotinfile" ]
 then
-	echo "FAILED - Privileged Commands not in audit"
+	echo "$count. Privileged Commands not in audit - FAILED"
+	((count++))
 else
-	echo "PASSED - Privileged Commands in audit"
+	echo "$count. Privileged Commands in audit - PASSED"
+	((count++))
 fi
 
 rm /tmp/1.log
@@ -1156,9 +1158,11 @@ bit32mountb32=`grep "\-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!
 
 if [ -z "$bit64mountb64" -o -z "$bit64mountb32" -o -z "$bit32mountb32" ]
 then
-	echo "FAILED - To determine filesystem mounts" 
+	echo "$count. To determine filesystem mounts - FAILED" 
+	((count++))
 else
-	echo "PASSED - To determine filesystem mounts"
+	echo "$count. To determine filesystem mounts - PASSED"
+	((count++))
 fi
 
 #6.2.1.16 Collect File Delection Events by User
@@ -1168,9 +1172,11 @@ bit32delb32=`grep "\-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -
 
 if [ -z "$bit64delb64" -o -z "$bit64delb32" -o -z "$bit32delb32" ]
 then
-	echo "FAILED - To determine the file delection event by user"
+	echo "$count. To determine the file delection event by user - FAILED"
+	((count++))
 else
-	echo "PASSED - To determine the file delection event by user"
+	echo "$count. To determine the file delection event by user - PASSED"
+	((count++))
 fi
 
 #6.2.1.17 Collect Changes to System Administration Scope
@@ -1179,9 +1185,11 @@ sudoers='-w /etc/sudoers -p wa -k scope'
 
 if [ -z "$chkscope" -o "$chkscope" != "$sudoers" ]
 then
-	echo "FAILED - To unauthorize change to scope of system administrator activity"
+	echo "$count. To unauthorize change to scope of system administrator activity - FAILED"
+	((count++))
 else
-	echo "PASSED - To unauthorize change to scope of system administrator activity"
+	echo "$count. To unauthorize change to scope of system administrator activity - PASSED"
+	((count++))
 fi
 
 #6.2.1.18 
@@ -1190,9 +1198,11 @@ adminrules='-w /var/log/sudo.log -p wa -k actions'
 
 if [ -z "$chkadminrules" -o "$chkadminrules" != "$adminrules" ]
 then 
-	echo "FAILED - Administrator activity not recorded"
+	echo "$count. Administrator activity not recorded - FAILED"
+	((count++))
 else
-	echo "PASSED - Administrator activity recorded"
+	echo "$count. Administrator activity recorded - PASSED"
+	((count++))
 fi
 
 #6.2.1.19
@@ -1203,9 +1213,11 @@ chkmod4=`grep "\-a always,exit -F arch=b64 -S init_module -S delete_module -k mo
 
 if [ -z "$chkmod1" -o -z "$chkmod2" -o -z "$chkmod3" -o -z "$chkmod4" ]
 then
-	echo "FAILED - Kernel module not recorded"
+	echo "$count. Kernel module not recorded - FAILED"
+	((count++))
 else
-	echo "PASSED - Kernel module recorded"
+	echo "$count. Kernel module recorded - PASSED"
+	((count++))
 fi
 
 #6.2.1.20
@@ -1214,9 +1226,11 @@ immute='-e 2'
 
 if [ -z "$chkimmute" -o "$chkimmute" != "$immute" ]
 then
-	echo "FAILED - Audit configuration is not immutable"
+	echo "$count. Audit configuration is not immutable - FAILED"
+	((count++))
 else
-	echo "PASSED - Audit configuration immutable"
+	echo "$count. Audit configuration immutable - PASSED"
+	((count++))
 fi
 
 #6.2.1.21
@@ -1229,80 +1243,91 @@ chkrotate6=`grep "/var/log/cron" /etc/logrotate.d/syslog`
 
 if [ -z "chkrotate1" -o -z "$chkrotate2" -o -z "$chkrotate3" -o -z "$chkrotate4" -o -z "$chkrotate5" -o -z "$chkrotate6" ]
 then
-	echo "FAILED - System logs not rotated"
+	echo "$count. System logs not rotated - FAILED"
+	((count++))
 else
-	echo "PASSED - System logs recorded"
+	echo "$count. System logs recorded - PASSED"
+	((count++))
 fi
 
 printf "\n"
-
-echo "7.1 Set Password Expiration Days"
-
-value=$(cat /etc/login.defs | grep "^PASS_MAX_DAYS" | awk '{ print $2 }')
+count=1
+echo "User Accounts, Groups and Environment"
+#7.1 Set Password Expiration Days
+value=`cat /etc/login.defs | grep "^PASS_MAX_DAYS" | awk '{ print $2 }'`
 
 standard=90 
 
 if [ ! $value = $standard ]; then
-  echo "Audit status: FAILED!"
+ 	echo "$count. Set Password Expiration Days - FAILED"
+	((count++))
 elif [ $value = $standard ]; then
-  echo "Audit status: PASSED!"
+ 	echo "$count. Set Password Expiration Days - PASSED"
+	((count++))
 else
-  echo "ERROR: FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+ 	echo "$count. ERROR: FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+	((count++))
 fi
-#########################################################################
-echo "7.2 Set Password Change Minimum Number of Days"
-value=$(cat /etc/login.defs | grep "^PASS_MIN_DAYS" | awk '{ print $2 }')
+
+# 7.2 Set Password Change Minimum Number of Days
+value=`cat /etc/login.defs | grep "^PASS_MIN_DAYS" | awk '{ print $2 }'`
 
 standard=7 
 
 if [ ! $value = $standard ]; then
-	echo "Audit status: FAILED!"
+	echo "$count. Set Password Change Minimum Number of Days - FAILED"
+	((count++))
 elif [ $value = $standard ]; then
-	echo "Audit status: PASSED!"
+	echo "$count. Set Password Change Minimum Number of Days - PASSED"
+	((count++))
 else
-	echo ERROR: "FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+	echo ERROR: "$count. FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+	((count++))
 fi
-#########################################################################
-echo "7.3 Set Password Expiring Warning Days"
-value=$(cat /etc/login.defs | grep "^PASS_WARN_AGE" | awk '{ print $2 }')
+
+# 7.3 Set Password Expiring Warning Days
+value=`cat /etc/login.defs | grep "^PASS_WARN_AGE" | awk '{ print $2 }'`
 
 standard=7 
 
 if [ ! $value = $standard ]; then
-	echo "Audit status: FAILED!"
+	echo "$count. Set Password Expiring Warning Days - FAILED"
+	((count++))
 elif [ $value = $standard ]; then
-	echo "Audit status: PASSED!"
+	echo "Set Password Expiring Warning Days - PASSED"
+	((count++))
 else
-	echo ERROR: "FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+	echo ERROR: "$count. FATAL ERROR, CONTACT SYSTEM ADMINISTRATOR!"
+	((count++))
 fi
-#########################################################################
-#7.4 Disable System Accounts
 
-echo "7.4 Disable System Accounts"
-
-current=$(egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/sbin/nologin" && $7!="/bin/false") { print $1 }')
+# 7.4 Disable System Accounts
+current=`egrep -v "^\+" /etc/passwd | awk -F: '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/sbin/nologin" && $7!="/bin/false") { print $1 }'`
 
 if [ -z "$current" ]; then
-	echo "Audit status: PASSED!"
+	echo "$count. Disable System Accounts - PASSED"
+	((count++))
 elif [ ! -z "$current" ]; then
-	echo "Audit status: FAILED!"
+	echo "$count. Disable System Accounts - FAILED"
+	((count++))
 else
-	echo "FATAL ERROR. PLEASE CONTACT YOUR SYSTEM ADMINISTRATOR!"
+	echo "$count. FATAL ERROR. PLEASE CONTACT YOUR SYSTEM ADMINISTRATOR!"
+	((count++))
 fi
-#########################################################################
-echo "7.5 Set Default Group for root Account"
 
-current=$(grep "^root:" /etc/passwd | cut -f4 -d:)
+# 7.5 Set Default Group for root Account
+current=`grep "^root:" /etc/passwd | cut -f4 -d:`
 
 if [ "$current" == 0 ]; then
-        echo "Audit status: PASSED!"
+        echo "$count. Set Default Group for root Account - PASSED"
+	((count++))
 else
-        echo "Audit status: FAILED!"
+        echo "$count. Set Default Group for root Account - FAILED"
+	((count++))
 fi
-#########################################################################
-echo "7.6 Set Default umask for Users"
 
-current=$(egrep -h "\s+umask ([0-7]{3})" /etc/bashrc /etc/profile | awk '{print $2}')
+#7.6 Set Default umask for Users
+current=`egrep -h "\s+umask ([0-7]{3})" /etc/bashrc /etc/profile | awk '{print $2}'`
 
 counter=0
 
@@ -1316,55 +1341,62 @@ done
 
 if [ ${counter} == 0 ]
 then 
-	echo "Audit status: PASSED!"
+	echo "$count. Set Default umask for Users - PASSED"
+	((count++))
 else     
-	echo "Audit status: FAILED!"
+	echo "$count. Set Default umask for Users - FAILED"
+	((count++))
 fi
-#########################################################################
-echo "7.7 Lock Inactive User Accounts"
 
-current=$(useradd -D | grep INACTIVE | awk -F= '{print $2}')
+# 7.7 Lock Inactive User Accounts
+current=`useradd -D | grep INACTIVE | awk -F= '{print $2}'`
 
 if [ "${current}" -le 30 ] && [ "${current}" -gt 0 ]
 then
-        echo "Audit status: PASSED!"
+        echo "$count. Lock Inactive User Accounts - PASSED"
+	((count++))
 else
-        echo "Audit status: FAILED!"
+        echo "$count. Lock Inactive User Accounts - FAILED"
+	((count++))
 fi
-#########################################################################
-echo "7.8 Ensure Password Fields Are Not Empty"
-current=$(cat /etc/shadow | awk -F: '($2 == "") { print $1 }')
+
+# 7.8 Ensure Password Fields Are Not Empty
+current=`cat /etc/shadow | awk -F: '($2 == "") { print $1 }'`
 
 if [ "$current" = "" ];then
-	echo "Audit status: PASSED!"
+	echo "$count. Ensure Password Fields Are Not Empty - PASSED"
+	((count++))
 else
-	echo "Audit status: FAILED!" 
+	echo "$count. Ensure Password Fields Are Not Empty - FAILED!"
+	((count++))
 fi
-#########################################################################
-echo "7.9 Verify No Legacy "+" Entries Exist in /etc/passwd, /etc/shadow and /etc/group files"
 
-passwd=$(grep '^+:' /etc/passwd) 
-shadow=$(grep '^+:' /etc/shadow)
-group=$(grep '^+:' /etc/group)
+# 7.9 Verify No Legacy "+" Entries Exist in /etc/passwd, /etc/shadow and /etc/group files
+passwd=`grep '^+:' /etc/passwd`
+shadow=`grep '^+:' /etc/shadow`
+group=`grep '^+:' /etc/group`
 
 if [ "$passwd" == "" ]  && [ "$shadow" == "" ] && [ "$group" == "" ];then
-	echo "Audit Status: PASSED!"
+	echo "$count. Verify No Legacy + Entries - PASSED"
+	((count++))
 else
-	echo "Audit Status: FAILED!"
+	echo "$count. Verify No Legacy + Entries - FAILED"
+	((count++))
 fi
-#########################################################################
-echo "7.10 Verify No UID 0 Accounts Exist Other Than Root"
 
-current=$(/bin/cat /etc/passwd | /bin/awk -F: '($3 ==0) { print $1 }')
+# 7.10 Verify No UID 0 Accounts Exist Other Than Root
+
+current=`/bin/cat /etc/passwd | /bin/awk -F: '($3 ==0) { print $1 }'`
 
 if [ "$current" = "root" ];then
-	echo "Audit status: PASSED!"
+	echo "$count. Verify No UID 0 Accounts Exist Other Than Root - PASSED"
+	((count++))
 else
-	echo "Audit status: FAILED!"
+	echo "Verify No UID 0 Accounts Exist Other Than Root - FAILED"
+	((count++))
 fi
-#########################################################################
-echo "7.11 Ensure root PATH Integrity"
 
+# 7.11 Ensure root PATH Integrity
 check=0
 
 #Check for Empty Directory in PATH (::)
@@ -1428,82 +1460,79 @@ done
 #echo ${check}
 if [ ${check} == 0 ]
 then
-	echo "Audit status: PASSED!"
+	echo "$count. Ensure root PATH Integrity - PASSED"
+	((count++))
 elif [ ${check} != 0 ]
 then
-	echo "Audit status: FAILED!"
+	echo "$count. Ensure root PATH Integrity - FAILED!"
+	((count++))
 else
-	echo "FATAL ERROR. PLEASE CONTACT YOUR SYSTEM ADMINISTRATOR!"
+	echo "$count. FATAL ERROR. PLEASE CONTACT YOUR SYSTEM ADMINISTRATOR!"
+	((count++))
 fi
 
-printf "\n"
-
-####################################### 7.12 #######################################
-
-echo "------------------------------------------------------------------------------------------"
-echo ' '
-echo "${bold}7.12 Check Permissions on User Home Directories${normal}"
-echo ' '
-intUserAcc="$(/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }')"
+# 7.12 Check Permissions on User Home Directories
+intUserAcc=`/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }'`
 
 if [ -z "$intUserAcc" ]
 then
-        echo "There is no interactive user account."
-        echo ' '
+        echo "$count. There is no interactive user account"
+	((count++))
 else
         /bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }' | while read -r line; do
 
                 echo "Checking user home directory $line"
-                permission="$(ls -ld $line)"
-                echo " Permission is ${permission:0:10}"
+                permission=`ls -ld $line`
+                echo "Permission is ${permission:0:10}"
                 ## check 6th field ##
                 if [ ${permission:5:1} == *"w"* ]
                 then
-                        echo -e "${RED} 6th field of permission is w ${NC}"
+                        echo "$count. 6th field of permission is w - FAILED"
+			((count++))
                 else
-                        echo -e "${GREEN} 6th field of permission is '-' ${NC}"
+                        echo "$count. 6th field of permission is '-' - PASSED"
+			((count++))
                 fi
 
                 ## check 8th field ##
                 if [ ${permission:7:1} == "-" ]
                 then
-                        echo -e "${GREEN} 8th field of permission is '-' ${NC}"
+                        echo "$count. 8th field of permission is '-' - PASSED"
+			((count++))
                 else
-                        echo -e "${RED} 8th field of permission is not '-' ${NC}"
- fi
+                        echo "$count. 8th field of permission is not '-' - FAILED"
+			((count++))
+ 		fi
 
                 ## check 9th field ##
                 if [ ${permission:8:1} == "-" ]
                 then
-                        echo -e "${GREEN} 9th field of permission is '-' ${NC}"
+                        echo "$count. 9th field of permission is '-' - PASSED"
+			((count++))
                 else
-                        echo -e "${RED} 9th field of permission is not '-' ${NC}"
+                        echo "$count. 9th field of permission is not '-' - FAILED"
+			((count++))
                 fi
 
                 ## check 10th field ##
                 if [ ${permission:9:1} == "-" ]
                 then
-                        echo -e "${GREEN} 10th field of permission is '-' ${NC}"
+                        echo "$count. 10th field of permission is '-' - PASSED"
+			((count++))
                 else
-                        echo -e "${RED} 10th field of permission is not '-' ${NC}"
+                        echo "$count. 10th field of permission is not '-' - FAILED"
+			((count++))
                 fi
-                echo " "
         done
 fi
 
-####################################### 7.13 #######################################
-
-echo "------------------------------------------------------------------------------------------"
-echo ' '
-echo "${bold}7.13 Check User Dot File Permissions${normal}"
-echo ' '
-
-intUserAcc="$(/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }')"
+# 7.13 Check User Dot File Permissions
+intUserAcc=`/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }'`
 
 if [ -z "$intUserAcc" ]
 then
-        echo "There is no interactive user account."
-        echo ' '
+        echo "$count. There is no interactive user account"
+	((count++))
 else
         /bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }' | while read -r line; do
 
