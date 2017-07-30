@@ -1613,8 +1613,7 @@ echo "Set Default Group for root Account"
 current=`grep "^root:" /etc/passwd | cut -f4 -d:`
   
 if [ "$current" == 0 ]; then
-	echo "Default Group for rooot Account is already set correctly"
-	exit 0
+	echo "Default Group for root Account is already set correctly"
 else
 	usermod -g 0 root
 	echo "Default Group for root Account is modified successfully"
