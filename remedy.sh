@@ -1261,4 +1261,4 @@ then
 	fi
 fi
 	
-pkill -P 1 -HUP auditd
+service auditd restart
