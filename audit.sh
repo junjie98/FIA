@@ -12,51 +12,64 @@ if [ "$EUID" -ne 0 ]
 fi
 
 datetime=`date +"%m%d%y-%H%M"`
+exec > >(tee "/root/remedy-"$datetime".txt") 2>&1
 
+count=1
 # 1.1 Create seperate partition for /tmp
 checktmp=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab`
 
 if [ -z "$checktmp" ]
 then
-	echo "1. /tmp - FAILED (A separate /tmp partition has not been created.)"
+	echo "$count. /tmp - FAILED (A separate /tmp partition has not been created)"
+	((count++))
 else
 	checknodev=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nodev` # 1.2 Set nodev option for /tmp partition
 	checknodev1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nodev`  
 	if [ -z "$checknodev" -a -z "$checknodev1" ]
 	then
-		echo "1. /tmp - FAILED (/tmp not mounted with nodev option)"
+		echo "$count. /tmp - FAILED (/tmp not mounted with nodev option)"
+		((count++))
 	elif [ -z "$checknodev" -a -n "$checknodev1" ]
 	then
-		echo "1. /tmp - FAILED (/tmp not mounted persistently with nodev option)"
+		echo "$count. /tmp - FAILED (/tmp not mounted persistently with nodev option)"
+		((count++))
 	elif [ -n "$checknodev" -a -z "$checknodev1" ]
 	then
-		echo "1. /tmp - FAILED (/tmp currently not mounted with nodev option)"
+		echo "$count. /tmp - FAILED (/tmp currently not mounted with nodev option)"
+		((count++))
 	else
 		checknosuid=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nosuid` # 1.3 Set nosuid option for /tmp partition
 		checknosuid1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nosuid`
 		if [ -z "$checknosuid" -a -z "$checknosuid1" ]
 		then
-			echo "1. /tmp - FAILED (/tmp not mounted with nosuid option)"
+			echo "$count. /tmp - FAILED (/tmp not mounted with nosuid option)"
+			((count++))
 		elif [ -z "$checknosuid" -a -n "$checknosuid1" ]
 		then
-			echo "1. /tmp - FAILED (/tmp not mounted persistently with nosuid option)"
+			echo "$count. /tmp - FAILED (/tmp not mounted persistently with nosuid option)"
+			((count++))
 		elif [ -n "$checknosuid" -a -z "$checknosuid1" ]
 		then
-			echo "1. /tmp - FAILED (/tmp currently not mounted with nosuid option)"
+			echo "$count. /tmp - FAILED (/tmp currently not mounted with nosuid option)"
+			((count++))
 		else	
 			checknoexec=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep noexec` # 1.4 Set noexec option for /tmp 	partition
 			checknoexec1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep noexec`
 			if [ -z "$checknoexec" -a -z "$checknoexec1" ]
 			then
-				echo "1. /tmp - FAILED (/tmp not mounted with noexec option)"
+				echo "$count. /tmp - FAILED (/tmp not mounted with noexec option)"
+				((count++))
 			elif [ -z "$checknoexec" -a -n "$checknoexec1" ]
 			then
-				echo "1. /tmp - FAILED (/tmp not mounted persistently with noexec option)"
+				echo "$count. /tmp - FAILED (/tmp not mounted persistently with noexec option)"
+				((count++))
 			elif [ -n "$checknoexec" -a -z "$checknoexec1" ]
 			then
-				echo "1. /tmp - FAILED (/tmp currently not mounted with noexec option)"
+				echo "$count. /tmp - FAILED (/tmp currently not mounted with noexec option)"
+				((count++))
 			else
-				echo "1. /tmp - PASSED (/tmp is a separate partition with nodev,nosuid,noexec option)"
+				echo "$count. /tmp - PASSED (/tmp is a separate partition with nodev,nosuid,noexec option)"
+				((count++))
 			fi
 		fi
 	fi
@@ -66,9 +79,11 @@ fi
 checkvar=`grep "[[:space:]]/var[[:space:]]" /etc/fstab`
 if [ -z "$checkvar" ]
 then
-	echo "2. /var - FAILED (A separate /var partition has not been created.)"
+	echo "$count. /var - FAILED (A separate /var partition has not been created)"
+	((count++))
 else 
-	echo "2. /var - PASSED (A separate /var partition has been created)"
+	echo "$count. /var - PASSED (A separate /var partition has been created)"
+	((count++))
 fi	
 
 # 1.6 Bind mount /var/tmp directory to /tmp
@@ -76,55 +91,68 @@ checkbind=`grep -e "^/tmp[[:space:]]" /etc/fstab | grep /var/tmp`
 checkbind1=`mount | grep /var/tmp`
 if [ -z "$checkbind" -a -z "$checkbind1" ]
 then
-	echo "3. /var/tmp - FAILED (/var/tmp mount is not bounded to /tmp)"
+	echo "$count. /var/tmp - FAILED (/var/tmp mount is not bounded to /tmp)"
+	((count++))
 elif [ -z "$checkbind" -a -n "$checkbind1" ]
 then
-	echo "3. /var/tmp - FAILED (/var/tmp mount has not been binded to /tmp persistently.)"
+	echo "$count. /var/tmp - FAILED (/var/tmp mount has not been binded to /tmp persistently)"
+	((count++))
 elif [ -n "$checkbind" -a -z "$checkbind1" ]
 then
-	echo "3. /var/tmp - FAILED (/var/tmp mount is not currently bounded to /tmp)"
+	echo "$count. /var/tmp - FAILED (/var/tmp mount is not currently bounded to /tmp)"
+	((count++))
 else 
-	echo "3. /var/tmp - PASSED (/var/tmp has been binded and mounted to /tmp)"
+	echo "$count. /var/tmp - PASSED (/var/tmp has been binded and mounted to /tmp)"
+	((count++))
 fi
 
 # 1.7 Create Separate Partition for /var/log
 checkvarlog=`grep "[[:space:]]/var/log[[:space:]]" /etc/fstab`
 if [ -z "$checkvarlog" ]
 then
-	echo "4. /var/log - FAILED (A separate /var/log partition has not been created.)"
+	echo "$count. /var/log - FAILED (A separate /var/log partition has not been created)"
+	((count++))
 else 
-	echo "4. /var/log - PASSED (A separate /var/log partition has been created)"
+	echo "$count. /var/log - PASSED (A separate /var/log partition has been created)"
+	((count++))
 fi	
 
 # 1.8 Create seperate partition for /var/log/audit
 checkvarlogaudit=`grep "[[:space:]]/var/log/audit[[:space:]]" /etc/fstab`
 if [ -z "$checkvarlogaudit" ]
 then
-	echo "5. /var/log/audit - FAILED (A separate /var/log/audit partition has not been created.)"
+	echo "$count. /var/log/audit - FAILED (A separate /var/log/audit partition has not been created)"
+	((count++))
 else 
-	echo "5. /var/log/audit - PASSED (A separate /var/log/audit partition has been created)"
+	echo "$count. /var/log/audit - PASSED (A separate /var/log/audit partition has been created)"
+	((count++))
 fi	
 
 # 1.9 Create seperate partition for /home
 checkhome=` grep "[[:space:]]/home[[:space:]]" /etc/fstab`
 if [ -z "$checkhome" ]
 then
-	echo "6. /home - FAILED (A separate /home partition has not been created.)"
+	echo "$count. /home - FAILED (A separate /home partition has not been created)"
+	((count++))
 else 
 	 checknodevhome=`grep "[[:space:]]/home[[:space:]]" /etc/fstab | grep nodev` # 1.10 Add nodev option to /home
 	 checknodevhome1=`mount | grep "[[:space:]]/home[[:space:]]" | grep nodev`
 	
 		if [ -z "$checknodevhome" -a -z "$checknodevhome1" ]
 		then
-			echo "6. /home - FAILED (/home not mounted with nodev option)"
+			echo "$count. /home - FAILED (/home not mounted with nodev option)"
+			((count++))
 		elif [ -z "$checknodevhome" -a -n "$checknodevhome1" ]
 		then
-			echo "6. /home - FAILED (/home not mounted persistently with nodev option)"
+			echo "$count. /home - FAILED (/home not mounted persistently with nodev option)"
+			((count++))
 		elif [ -n "$checknodevhome" -a -z "$checknodevhome1" ]
 		then
-			echo "6. /home - FAILED (/home currently not mounted with nodev option)"
+			echo "$count. /home - FAILED (/home currently not mounted with nodev option)"
+			((count++))
 	else
-		echo "6. /home - PASSED (/home is a separate partition with nodev option)"
+		echo "$count. /home - PASSED (/home is a separate partition with nodev option)"
+		((count++))
 	fi
 fi
 
@@ -137,27 +165,34 @@ then
 	cdnosuidcheck=`grep cdrom /etc/fstab | grep noexec` # 1.12 Add noexec option to removable media partitions
 	if [ -z "$cdnosuidcheck" ]
 	then
-			echo "7. /cdrom - FAILED (/cdrom not mounted with nodev option)"
+		echo "$count. /cdrom - FAILED (/cdrom not mounted with nodev option)"
+		((count++))
 	elif [ -z "$cdnosuidcheck" ]
 	then
-			echo "7. /cdrom - FAILED (/cdrom not mounted with nosuid option)"
+		echo "$count. /cdrom - FAILED (/cdrom not mounted with nosuid option)"
+		((count++))
 	elif [ -z "$cdnosuidcheck" ]
 	then
-			echo "7. /cdrom - FAILED (/cdrom not mounted with noexec option)"
+		echo "$count. /cdrom - FAILED (/cdrom not mounted with noexec option)"
+		((count++))
 	else
-		"7. /cdrom - PASSED (/cdrom is a mounted with nodev,nosuid,noexec option)"
+		echo "$count. /cdrom - PASSED (/cdrom a mounted with nodev,nosuid,noexec option)"
+		((count++))
 	fi
 else
-	echo "7. /cdrom - PASSED (/cdrom not mounted)"
+	echo "$count. /cdrom - PASSED (/cdrom not mounted)"
+	((count++))
 fi
 
 # 1.14 Set sticky bit on all world-writable directories
 checkstickybit=`df --local -P | awk {'if (NR1=1) print $6'} | xargs -l '{}' -xdev -type d \(--perm -0002 -a ! -perm -1000 \) 2> /dev/null`
 if [ -n "$checkstickybit" ]
 then
-	echo "8. Sticky Bit - FAILED (Sticky bit is not set on all world-writable directories)"
+	echo "$count. Sticky Bit - FAILED (Sticky bit is not set on all world-writable directories)"
+	((count++))
 else
-	echo "8. Sticky Bit - PASSED (Sticky bit is set on all world-writable directories)"
+	echo "$count. Sticky Bit - PASSED (Sticky bit is set on all world-writable directories)"
+	((count++))
 fi
 
 # 1.15 Disable mounting of legacy filesystems
@@ -171,13 +206,15 @@ checkudf=`/sbin/lsmod | grep udf`
 
 if [ -n "$checkcramfs" -o -n "$checkfreevxfs" -o -n "$checkjffs2" -o -n "$checkhfs" -o -n "$checkhfsplus" -o -n "$checksquashfs" -o -n "$checkudf" ]
 then
-	echo "9. Legacy File Systems - FAILED (Not all legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	echo "$count. Legacy File Systems - FAILED (Not all legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	((count++))
 else
-	echo "9. Legacy File Systems - PASSED (All legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	echo "$count. Legacy File Systems - PASSED (All legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	((count++))
 fi
 
 printf "\n"
-printf "Services\n"
+echo "Services"
 
 # 2.1-2.10 Checking of services
 services=( "telnet" "telnet-server" "rsh-server" "rsh" "ypserv" "ypbind" "tftp" "tftp-server" "xinetd" )
@@ -777,16 +814,15 @@ else
 fi
 
 # 6.1.5
-echo -e "\e[4m6.1.5 : Configure rsyslogto Send Logs to a Remote Log Host\e[0m\n"
-checkloghost=$(grep "^*.*[^|][^|]*@" /etc/rsyslog.conf)
+checkloghost=`grep "^*.*[^|][^|]*@" /etc/rsyslog.conf`
 if [ -z "$checkloghost" ]  # If there is no log host
 then
-	printf "Remote Log Host : FAILED (Remote log host has not been configured)\n"
+	echo "$count. Remote Log Host : FAILED (Remote log host has not been configured)"
+	((count++))
 else
-	printf "Remote Log Host : PASSED (Remote log host has been configured)\n"
+	echo "$count. Remote Log Host : PASSED (Remote log host has been configured)"
+	((count++))
 fi
-
-printf "\n\n"
 
 # 6.1.6 Accept Remote rsyslog Messages Only on Designated Log Hosts
 checkrsysloglis=`grep '^$ModLoad imtcp.so' /etc/rsyslog.conf`
@@ -1615,6 +1651,9 @@ else
 fi
 
 # 7.15 Check for Presence of User .rhosts Files
+printf "\n"
+count=1
+echo "Check for Presence of User .rhosts Files"
 intUserAcc=`/bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }'`
 
 if [ -z "$intUserAcc" ]
@@ -1655,6 +1694,9 @@ else
 fi
 
 # 7.16 Check Groups in /etc/passwd
+printf "\n"
+count=1
+echo "Check Groups in /etc/passwd"
 for i in `cut -s -d: -f4 /etc/passwd | sort -u`; do
 	grep -q -P "^.*?:x:$i:" /etc/group
 	if [ $? -ne 0 ]
@@ -1668,6 +1710,9 @@ for i in `cut -s -d: -f4 /etc/passwd | sort -u`; do
 done
 
 # 7.17 Check That Users Are Assigned Valid Home Directories && Home Directory Ownership is Correct
+printf "\n"
+count=1
+echo "Check That Users Are Assigned Valid Home Directories && Home Directory Ownership is Correct"
 cat /etc/passwd | awk -F: '{ print $1,$3,$6 }' | while read user uid dir; do
 
 	#checking validity of  user assigned home directories
@@ -1732,11 +1777,9 @@ echo "Check for Duplicate GIDs"
 done
 
 printf "\n"
-echo "Warning Banners"
-count=1
-
 #7.20 - Check that reserved UIDs are assigned to only system accounts
-echo "7.20 Check that reserved UIDs are assigned to only system accounts."
+echo "Check that reserved UIDs are assigned to only system accounts"
+count=1
 
 systemaccount=(root bin daemon adm lp sync shutdown halt mail news uucp operator games gopher ftp nobody nscd vcsa rpc mailnull smmsp pcap ntp dbus avahi sshd rpcuser nfsnobody haldaemon avahi-autoipd distcache apache oprofile webalizer dovecot squid named xfs gdm sabayon usbmuxd rtkit abrt saslauth pulse postfix tcpdump systemd-network tss radvd [51]=qemu)
 
@@ -1758,55 +1801,72 @@ do
 
 		if [[ $nameCounter < 1 ]]
 		then
-			echo "User '$f1' is not a system account but has a reserved UID of $f3."
+			echo "$count. User '$f1' is not a system account but has a reserved UID of $f3"
+			((count++))
+		else
+			echo "$count. User '$f1' with UID of $f3 - PASSED"
+			((count++))
 		fi
 		nameCounter=0
 	fi
 done <"$systemNameFile"
 
+printf "\n"
+count=1
 #7.21 - Duplicate User Names
-echo ""
-
-echo "7.21 Check for duplicate user names."
-
+echo "Check Duplicate User Names"
 cat /etc/passwd | cut -f1 -d":" | /bin/sort -n | /usr/bin/uniq -c |
 while read x ; do
-[ -z "${x}" ] && break
-set - $x
-if [ $1 -gt 1 ]; then
-uids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/passwd | xargs`
-echo "There are $1 duplicate user name titled '$2' found in the system and its respective UIDs are ${uids}."
-fi
+	[ -z "${x}" ] && break
+	set - $x
+	if [ $1 -gt 1 ]; then
+		uids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/passwd | xargs`
+		echo "$count. There are $1 duplicate user name titled '$2' found in the system and its respective UIDs are ${uids} - FAILED"
+		((count++))
+	else
+		echo "$count. $2 user name - PASSED"
+		((count++))
+	fi
 done
 
-
+printf "\n"
+count=1
 #7.22 - Duplicate Group Names
-echo ""
-
-echo "7.22 Check for duplicate group names."
+printf "\n"
+echo "Check for duplicate group names"
 
 cat /etc/group | cut -f1 -d":" | /bin/sort -n | /usr/bin/uniq -c | 
 while read x ; do
-[ -z "${x}" ] && break
-set - $x
-if [ $1 -gt 1 ]; then
-gids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/group | xargs`
-echo "There are $1 duplicate group name titled '$2' found in the system and its respective UIDs are ${gids}."
-fi
+	[ -z "${x}" ] && break
+	set - $x
+	if [ $1 -gt 1 ]; then
+		gids=`/bin/gawk -F: '($1 == n) { print $3 }' n=$2 /etc/group | xargs`
+		echo "$count. There are $1 duplicate group name titled '$2' found in the system and its respective UIDs are ${gids} - FAILED"
+		((count++))
+	else
+		echo "$count. $2 group name - PASSED"
+		((count++))
+	fi
 done
 
-
+printf "\n"
+count=1
 #7.23 - Check for presence of user .forward files
-echo ""
-
-echo "7.23 Check for presence of user ./forward files."
+echo "Check for presence of user ./forward files"
 
 for dir in `/bin/cat /etc/passwd | /bin/awk -F: '{ print $6 }'`; do
-if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then 
-echo ".forward file titled '$dir/.forward' found in the system."
-fi
+	if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then 
+		echo "$count. .forward file titled '$dir/.forward' found in the system - FAILED"
+		((count++))
+	else
+		echo "$count. No presence of user .foward files - PASSED"
+		((count++))
+	fi
 done
 
+printf "\n"
+count=1
+echo "Warning Banners"
 # 8.1 Set Warning Banner for Standard Login Services
 current=`cat /etc/motd`
 
@@ -2469,3 +2529,7 @@ else
 	echo "$count. Please configure the settings again - FAILED"
 	((count++))
 fi
+
+echo "This audit is performed at $datetime"
+read -n 1 -s -r -p "Press any key to exit!"
+kill -9 $PPID
