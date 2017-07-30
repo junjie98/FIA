@@ -1827,7 +1827,7 @@ then
         #echo "There is no interactive user account"
         echo ''
 else
-        /bin/cat /etc/passwd | /bin/egrep -v '(root|halt|sync|shutdown)' | /bin/awk -F: '($7 != "/sbin/nologin"){ print $6 }' | while read -r line; do
+        /cat /etc/passwd | /egrep -v '(root|halt|sync|shutdown)' | awk -F: '($7 != "/sbin/nologin"){ print $6 }' | while read -r line; do
                 #echo "Checking user home directory $line"
 		rhostsfile=`ls -al $line | grep .rhosts`
                 if  [ -z "$rhostsfile" ]
@@ -1845,17 +1845,11 @@ else
                                                 filecreateduser=$(stat -c %U $line/$file)
                                                 if [[ $filecreateduser = *"$line"* ]]
                                                 then
-#echo -e "${GREEN} $file created user is the same user in the directory${NC}"
-
- echo ''
+ 							echo ''
                                                 else
-
- #echo -e "${RED} $file created user is not the same in the directory. This file should be deleted! ${NC}"
-
- echo ''
+							echo ''
                                                         cd $line
-
- rm $file
+							rm $file
                                                 fi
                                         fi
                                 done
@@ -1881,7 +1875,6 @@ do
         		grep -q -P "^.*?:x:$i:" /etc/group
         		if [ $? -ne 0 ]
         		then
-                		#echo -e "${RED}Group $i is referenced by /etc/passwd but does not exist in /etc/group${NC}"
 				groupadd -g $i group$i
 			fi
 		done
@@ -1947,6 +1940,53 @@ do
                 sleep 3
                 ;;
         esac
+done
+
+echo "Check for Duplicate UIDs"
+echo "No Output = Pass"
+cat /etc/passwd | cut -f3 -d":" | sort -n | uniq -c |\
+	while read x ; do
+	[ -z "${x}" ] && break
+	set - $x
+	if [ $1 -gt 1 ]; then
+		users=`gawk -F: '($3 == n) { print $1 }' n=$2 \/etc/passwd | xargs`
+        	echo "Duplicate UID ($2): ${users}"
+    	fi
+done
+
+echo "Check for Duplicate GIDs"
+echo "No Output = Pass"
+cat /etc/group | cut -f3 -d":" | sort -n | uniq -c |\
+	while read x ; do
+	[ -z "${x}" ] && break
+	set - $x
+	if [ $1 -gt 1 ]; then
+		grps=`gawk -F: '($3 == n) { print $1 }' n=$2 \/etc/group | xargs`
+		echo "Duplicate GID ($2): ${grps}"
+	fi 
+done
+
+echo "Check for Duplicate User Names"
+echo "No Output = Pass"
+cat /etc/passwd | cut -f1 -d":" | sort -n | uniq -c |\
+	while read x ; do
+	[ -z "${x}" ] && break
+	set - $x
+	if [ $1 -gt 1 ]; then
+		uids=`gawk -F: '($1 == n) { print $3 }' n=$2 \/etc/passwd | xargs`
+		echo "Duplicate User Name ($2): ${uids}"
+	fi
+done
+
+echo "Check for Presence of User .forward Files"
+for dir in `/bin/cat /etc/passwd | /bin/awk -F: '{ print $6 }'`; do
+	if [ ! -h "$dir/.forward" -a -f "$dir/.forward" ]; then
+		chmod u=rw- $dir/.forward
+		chmod g=--- $dir/.forward
+		chmod o=--- $dir/.forward
+		echo "Remediation performed for presence of $dir/.forward file."
+		echo "$dir/.forward can only be read and written by the owner only now."
+	fi
 done
 
 echo "Set Warning Banner for Standard Login Services"
