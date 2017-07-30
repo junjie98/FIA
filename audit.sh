@@ -11,6 +11,8 @@ if [ "$EUID" -ne 0 ]
 	exit
 fi
 
+datetime=`date +"%m%d%y-%H%M"`
+
 # 1.1 Create seperate partition for /tmp
 checktmp=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab`
 
@@ -212,15 +214,18 @@ done
 
 printf "\n"
 printf "Special Purpose Services\n"
+count=1
 
 # 3.1 Set daemon umask
 checkumask=`grep ^umask /etc/sysconfig/init`
 
 if [ "$checkumask" == "umask 027" ]
 then 
-	echo "1. Umask - PASSED (umask is set to 027)"
+	echo "$count. Umask - PASSED (umask is set to 027)"
+	((count++))
 else 
-	echo "1. Umask - FAILED (umask is not set to 027)"
+	echo "$count. Umask - FAILED (umask is not set to 027)"
+	((count++))
 fi
 
 # 3.2 Remove the x window system
@@ -229,17 +234,21 @@ checkxsysteminstalled=`rpm  -q xorg-x11-server-common`	#Must return something
 	
 if [ -z "$checkxsystem" -a -z "$checkxsysteminstalled" ]
 then 
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is installed)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is installed)"
+	((count++))
 elif [ -z "$checkxsystem" -a -n "$checkxsysteminstalled" ]
 then
-	echo "2. X Window System - PASSED (Xorg-x11-server-common is not installed and is not the default graphical interface)"
+	echo "$count. X Window System - PASSED (Xorg-x11-server-common is not installed and is not the default graphical interface)"
+	((count++))
 elif [ -n "$checkxsystem" -a -z "$checkxsysteminstalled" ]
 then
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is not installed and is the default graphical interface)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is not installed and is the default graphical interface)"
+	((count++))
 else 
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is installed and is the default graphical interface)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is installed and is the default graphical interface)"
+	((count++))
 fi
-count=3
+
 	checkavahi=`systemctl status avahi-daemon | grep inactive` # 3.3 Disable avahi server
 	checkavahi1=`systemctl status avahi-daemon | grep disabled`
 	if [ -n "$checkavahi" -a -n "$checkavahi1" ]
@@ -441,6 +450,9 @@ else
 	((count++))
 fi
 
+printf "\n"
+echo "Secure Boot Settings"
+count=1
 # 4.1 & 4.2 Set User/Group Owner on /boot/grub2/grub.cfg & Set Permissions on /boot/grub2/grub.cfg
 checkgrubowner=`stat -L -c "owner=%U group=%G" /boot/grub2/grub.cfg`
 
@@ -482,6 +494,9 @@ else
 	fi
 fi
 
+printf "\n"
+echo "Additional Process Hardening"
+count=1
 # 5.1 Restrict Core Dumps
 checkcoredump=`grep "hard core" /etc/security/limits.conf`
 coredumpval="* hard core 0"
@@ -518,6 +533,9 @@ else
 	((count++))
 fi
 
+printf "\n"
+echo "Configure Rsyslog"
+count=1
 # 6.1.1 Install the rsyslog package
 # 6.1.2 Activate the rsyslog service
 checkrsyslog=`rpm -q rsyslog | grep "^rsyslog"`
@@ -771,6 +789,9 @@ else
 	((count++))
 fi
 
+printf "\n"
+echo "Configure Data Retention"
+count=1
 # 6.2.1.1 Configure Audit Log Storage Size
 checklogstoragesize=`grep max_log_file[[:space:]] /etc/audit/auditd.conf | awk '{print $3}'`
 
@@ -1046,7 +1067,9 @@ logintally=`grep "\-w /var/log/tallylog -p wa -k logins" /etc/audit/audit.rules`
 
 if [ -z "$loginfail" -o -z "$loginlast" -o -z "$logintally" ]
 then
-        echo "FAILED - Login and logout events not recorded."
+        echo "$count. Login and logout events not recorded - FAILED"
+	((count++))
 else
-        echo "PASSED - Login and logout events recorded."
+        echo "$count. Login and logout events recorded - PASSED"
+	((count++))
 fi
