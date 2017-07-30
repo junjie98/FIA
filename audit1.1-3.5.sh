@@ -11,6 +11,8 @@ if [ "$EUID" -ne 0 ]
 	exit
 fi
 
+datetime=`date +"%m%d%y-%H%M"`
+
 # 1.1 Create seperate partition for /tmp
 checktmp=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab`
 
@@ -18,7 +20,7 @@ if [ -z "$checktmp" ]
 then
 	echo "1. /tmp - FAILED (A separate /tmp partition has not been created.)"
 else
-	checknodev=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nodev` # 1.2 Set nodev option for partition
+	checknodev=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nodev` # 1.2 Set nodev option for /tmp partition
 	checknodev1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nodev`  
 	if [ -z "$checknodev" -a -z "$checknodev1" ]
 	then
@@ -30,7 +32,7 @@ else
 	then
 		echo "1. /tmp - FAILED (/tmp currently not mounted with nodev option)"
 	else
-		checknosuid=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nosuid` # 1.3 Set nosuid option for partition
+		checknosuid=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep nosuid` # 1.3 Set nosuid option for /tmp partition
 		checknosuid1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep nosuid`
 		if [ -z "$checknosuid" -a -z "$checknosuid1" ]
 		then
@@ -42,7 +44,7 @@ else
 		then
 			echo "1. /tmp - FAILED (/tmp currently not mounted with nosuid option)"
 		else	
-			checknoexec=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep noexec` # 1.4 Set noexec option for partition
+			checknoexec=`grep "[[:space:]]/tmp[[:space:]]" /etc/fstab | grep noexec` # 1.4 Set noexec option for /tmp 	partition
 			checknoexec1=`mount | grep "[[:space:]]/tmp[[:space:]]" | grep noexec`
 			if [ -z "$checknoexec" -a -z "$checknoexec1" ]
 			then
@@ -85,7 +87,7 @@ else
 	echo "3. /var/tmp - PASSED (/var/tmp has been binded and mounted to /tmp)"
 fi
 
-# 1.7 Set nosuid option for partition
+# 1.7 Create Separate Partition for /var/log
 checkvarlog=`grep "[[:space:]]/var/log[[:space:]]" /etc/fstab`
 if [ -z "$checkvarlog" ]
 then
@@ -126,13 +128,13 @@ else
 	fi
 fi
 
-# 1.11 Add nodev option to removable media partitions
+
 cdcheck=`grep cd /etc/fstab` 
 if [ -n "$cdcheck" ]
 then
-	cdnodevcheck=`grep cdrom /etc/fstab | grep nodev` # 1.12 Add noexec option to removable media partitions
+	cdnodevcheck=`grep cdrom /etc/fstab | grep nodev` # 1.11 Add nodev option to removable media partitions
 	cdnosuidcheck=`grep cdrom /etc/fstab | grep nosuid` # 1.13 Add nosuid option to removable media partitions
-	cdnosuidcheck=`grep cdrom /etc/fstab | grep noexec` # 1.14 
+	cdnosuidcheck=`grep cdrom /etc/fstab | grep noexec` # 1.12 Add noexec option to removable media partitions
 	if [ -z "$cdnosuidcheck" ]
 	then
 			echo "7. /cdrom - FAILED (/cdrom not mounted with nodev option)"
@@ -169,9 +171,9 @@ checkudf=`/sbin/lsmod | grep udf`
 
 if [ -n "$checkcramfs" -o -n "$checkfreevxfs" -o -n "$checkjffs2" -o -n "$checkhfs" -o -n "$checkhfsplus" -o -n "$checksquashfs" -o -n "$checkudf" ]
 then
-	echo "8. Legacy File Systems - FAILED (Not all legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	echo "9. Legacy File Systems - FAILED (Not all legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
 else
-	echo "8. Legacy File Systems - PASSED (All legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
+	echo "9. Legacy File Systems - PASSED (All legacy file systems are disabled i.e. cramfs, freevxfs, jffs2, hfs, hfsplus, squashfs and udf)"
 fi
 
 printf "\n"
@@ -212,15 +214,18 @@ done
 
 printf "\n"
 printf "Special Purpose Services\n"
+count=1
 
 # 3.1 Set daemon umask
 checkumask=`grep ^umask /etc/sysconfig/init`
 
 if [ "$checkumask" == "umask 027" ]
 then 
-	echo "1. Umask - PASSED (umask is set to 027)"
+	echo "$count. Umask - PASSED (umask is set to 027)"
+	((count++))
 else 
-	echo "1. Umask - FAILED (umask is not set to 027)"
+	echo "$count. Umask - FAILED (umask is not set to 027)"
+	((count++))
 fi
 
 # 3.2 Remove the x window system
@@ -229,17 +234,21 @@ checkxsysteminstalled=`rpm  -q xorg-x11-server-common`	#Must return something
 	
 if [ -z "$checkxsystem" -a -z "$checkxsysteminstalled" ]
 then 
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is installed)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is installed)"
+	((count++))
 elif [ -z "$checkxsystem" -a -n "$checkxsysteminstalled" ]
 then
-	echo "2. X Window System - PASSED (Xorg-x11-server-common is not installed and is not the default graphical interface)"
+	echo "$count. X Window System - PASSED (Xorg-x11-server-common is not installed and is not the default graphical interface)"
+	((count++))
 elif [ -n "$checkxsystem" -a -z "$checkxsysteminstalled" ]
 then
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is not installed and is the default graphical interface)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is not installed and is the default graphical interface)"
+	((count++))
 else 
-	echo "2. X Window System - FAILED (Xorg-x11-server-common is installed and is the default graphical interface)"
+	echo "$count. X Window System - FAILED (Xorg-x11-server-common is installed and is the default graphical interface)"
+	((count++))
 fi
-count=3
+
 	checkavahi=`systemctl status avahi-daemon | grep inactive` # 3.3 Disable avahi server
 	checkavahi1=`systemctl status avahi-daemon | grep disabled`
 	if [ -n "$checkavahi" -a -n "$checkavahi1" ]
@@ -259,7 +268,7 @@ count=3
 		((count++))
 	fi
 	
-	# 3.4 Disable print server - cups
+# 3.4 Disable print server - cups
 	checkcups=`systemctl status cups | grep inactive`
 	checkcups1=`systemctl status cups | grep disabled`
 	
