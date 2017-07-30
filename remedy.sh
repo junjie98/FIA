@@ -2556,7 +2556,7 @@ fi
 echo "Set SSH Banner"
 remsshbanner=`grep "Banner" /etc/ssh/sshd_config | awk '{ print $2 }'`
 
-if [ "$remsshbanner" == "/etc/issue.net" -o "$remsshbanner" == "/etc/issue" ]
+if [ "$remsshbanner" != "/etc/issue.net" -o "$remsshbanner" != "/etc/issue" ]
 then
 	sed -ie "138d" /etc/ssh/sshd_config
 	sed -ie "138iBanner /etc/issue.net" /etc/ssh/sshd_config
