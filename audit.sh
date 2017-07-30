@@ -1088,9 +1088,11 @@ sessionutmp=`egrep "\-w /var/run/utmp -p wa -k session" /etc/audit/audit.rules`
 
 if [ -z "$sessionwtmp" -o -z "$sessionbtmp" -o -z "sessionutmp" ]
 then
-        echo "FAILED - Session initiation information not collected."
+        echo "$count. Session initiation information not collected - FAILED"
+	((count++))
 else
-        echo "PASSED - Session initiation information is collected."
+        echo "$count. Session initiation information is collected - PASSED"
+	((count++))
 fi
 
 #6.2.1.12
@@ -1100,17 +1102,16 @@ permission2=`grep "\-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F
 auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
 permission3=`grep "\-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S|chown -F auid>=1000 -F auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
 permission4=`grep "\-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S|chown -F auid>=1000 -F auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
-permission5=`grep "\-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -Fauid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
-permission6=`grep "\-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S
- fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F
-auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
+permission5=`grep "\-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
+permission6=`grep "\-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod" /etc/audit/audit.rules`
 
 if [ -z "$permission1" -o -z "$permission2" -o -z permission3 -o -z permission4 -o -z permission5 -o -z permission6 ]
 then
-        echo "FAILED - Permission modifications not recorded."
-
+        echo "$count. Permission modifications not recorded - FAILED"
+	((count++))
 else
-        echo "PASSED - Permission modification are recorded."
+        echo "$count. Permission modification are recorded - PASSED"
+	((count++))
 fi
 
 #6.2.1.13
@@ -1124,10 +1125,10 @@ access6=`grep "\-a always,exit -F arch=b32 -S creat -S open -S openat -S truncat
 
 if [ -z "$access1" -o -z "$access2" -o -z "$access3" -o -z "$access4" -o -z "$access5" -o -z "$access6" ]
 then
-        echo "FAILED - Unsuccesful attempts to access files."
+        echo "$count. Unsuccesful attempts to access files - FAILED"
 
 else
-        echo "PASSED - Successful attempts to access files."
+        echo "$count. Successful attempts to access files - PASSED"
 fi
 
 #6.2.1.14 Collect Use of Privileged Commands
@@ -1140,9 +1141,9 @@ checkpriviledgenotinfile=`grep -F -x -v -f /tmp/2.log /tmp/1.log`
 
 if [ -n "$checkpriviledgenotinfile" ]
 then
-	echo "FAIL - Privileged Commands not in audit"
+	echo "FAILED - Privileged Commands not in audit"
 else
-	echo "PASS - Privileged Commands in audit"
+	echo "PASSED - Privileged Commands in audit"
 fi
 
 rm /tmp/1.log
@@ -1155,9 +1156,9 @@ bit32mountb32=`grep "\-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!
 
 if [ -z "$bit64mountb64" -o -z "$bit64mountb32" -o -z "$bit32mountb32" ]
 then
-	echo "FAIL - To determine filesystem mounts" 
+	echo "FAILED - To determine filesystem mounts" 
 else
-	echo "PASS - To determine filesystem mounts"
+	echo "PASSED - To determine filesystem mounts"
 fi
 
 #6.2.1.16 Collect File Delection Events by User
@@ -1167,9 +1168,9 @@ bit32delb32=`grep "\-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -
 
 if [ -z "$bit64delb64" -o -z "$bit64delb32" -o -z "$bit32delb32" ]
 then
-	echo "FAIL - To determine the file delection event by user"
+	echo "FAILED - To determine the file delection event by user"
 else
-	echo "PASS - To determine the file delection event by user"
+	echo "PASSED - To determine the file delection event by user"
 fi
 
 #6.2.1.17 Collect Changes to System Administration Scope
@@ -1178,9 +1179,9 @@ sudoers='-w /etc/sudoers -p wa -k scope'
 
 if [ -z "$chkscope" -o "$chkscope" != "$sudoers" ]
 then
-	echo "FAIL - To unauthorize change to scope of system administrator activity"
+	echo "FAILED - To unauthorize change to scope of system administrator activity"
 else
-	echo "PASS - To unauthorize change to scope of system administrator activity"
+	echo "PASSED - To unauthorize change to scope of system administrator activity"
 fi
 
 #6.2.1.18 
